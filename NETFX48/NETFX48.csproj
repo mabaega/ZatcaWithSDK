@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F5E34A50-E773-4065-809B-9224BD4C2836}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NETFX48</RootNamespace>
+    <AssemblyName>NETFX48</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.ByteCode">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\IKVM.ByteCode.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Java">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\IKVM.Java.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\IKVM.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Posix">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Mono.Posix.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Unix">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Mono.Unix.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="saxon">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\saxon.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO.Pipelines, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.IO.Pipelines.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Xml">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Security.Cryptography.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="xerces">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\xerces.dll</HintPath>
+    </Reference>
+    <Reference Include="Zatca.EInvoice.SDK">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Zatca.EInvoice.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="Zatca.EInvoice.SDK.Contracts">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Zatca.EInvoice.SDK.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="Zatca.EInvoice.SDK.Saxon">
+      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.4_SIM\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net48\Zatca.EInvoice.SDK.Saxon.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Data\Certificates\cert.pem" />
+    <None Include="Data\Certificates\ec-secp256k1-priv-key.pem" />
+    <None Include="Data\Input\csr-config-example-AR-VAT-Group.properties" />
+    <None Include="Data\Input\csr-config-example-AR.properties" />
+    <None Include="Data\Input\csr-config-example-EN-VAT-group.properties" />
+    <None Include="Data\Input\csr-config-example-EN.properties" />
+    <None Include="Data\Input\csr-config-template.properties" />
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\CCTS_CCT_SchemaModule-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-CommonAggregateComponents-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-CommonBasicComponents-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-CommonExtensionComponents-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-CommonSignatureComponents-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-CoreComponentParameters-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-ExtensionContentDataType-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-QualifiedDataTypes-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-SignatureAggregateComponents-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-SignatureBasicComponents-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-UnqualifiedDataTypes-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-XAdESv132-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-XAdESv141-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\common\UBL-xmldsig-core-schema-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\Schemas\xsds\UBL2.1\xsd\maindoc\UBL-Invoice-2.1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\YCertificates\cert.pem" />
+    <None Include="Data\YCertificates\ec-secp256k1-priv-key.pem" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Invoice\300535209500003_20240831000000_6 %281%29.xml" />
+    <Content Include="Data\Invoice\Simplified_Invoice.xml" />
+    <Content Include="Data\PIH\pih.txt" />
+    <Content Include="Data\Rules\schematrons\20210819_ZATCA_E-invoice_Validation_Rules.xsl" />
+    <Content Include="Data\Rules\schematrons\CEN-EN16931-UBL.xsl" />
+    <Content Include="Data\Samples\Simplified\Credit\Credit Note of a Simplified Tax Invoice.xml" />
+    <Content Include="Data\Samples\Simplified\Credit\Simplified_Credit_Note.xml" />
+    <Content Include="Data\Samples\Simplified\Credit\Simplified_Credit_Note_Error.xml" />
+    <Content Include="Data\Samples\Simplified\Debit\Simplified_Debit_Note.xml" />
+    <Content Include="Data\Samples\Simplified\Debit\Simplified_Debit_Note_Error.xml" />
+    <Content Include="Data\Samples\Simplified\Invoice\Nominal supply invoice.xml" />
+    <Content Include="Data\Samples\Simplified\Invoice\Simplified Tax Invoice with Zero Rated Item.xml" />
+    <Content Include="Data\Samples\Simplified\Invoice\Simplified_Invoice.xml" />
+    <Content Include="Data\Samples\Simplified\Invoice\Simplified_Invoice_Error.xml" />
+    <Content Include="Data\Samples\Standard\Credit\Standard_Credit_Note.xml" />
+    <Content Include="Data\Samples\Standard\Credit\Standard_Credit_Note_Error.xml" />
+    <Content Include="Data\Samples\Standard\Debit\Standard_Debit_Note.xml" />
+    <Content Include="Data\Samples\Standard\Debit\Standard_Debit_Note_Error.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Advance Payment adjustments with foreign currency invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Advance Payment adjustments with rate change scenarios.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Advance Payment adjustments.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Exempt Tax Invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Export invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Out of Scope Standard Tax Invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Self-billing invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Standard Invoice with Document Level Charge.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Standard Invoice with Payable Rounding Adjustment.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Standard_Invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Standard_Invoice_Error.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Summary Invoice.xml" />
+    <Content Include="Data\Samples\Standard\Invoice\Third party billing.xml" />
+    <Content Include="Data\schematrons\20210819_ZATCA_E-invoice_Validation_Rules.xsl" />
+    <Content Include="Data\schematrons\CEN-EN16931-UBL.xsl" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

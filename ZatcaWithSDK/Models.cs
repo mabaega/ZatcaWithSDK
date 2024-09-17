@@ -14,7 +14,7 @@ namespace ZatcaWithSDK
             public string Secret { get; set; }
             public List<string> Errors { get; set; }
         }
-        public class OnboardingResultDto
+        public class OnboardingResult
         {
             public string GeneratedCsr { get; set; }
             public string PrivateKey { get; set; }

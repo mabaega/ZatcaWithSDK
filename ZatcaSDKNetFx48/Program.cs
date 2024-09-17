@@ -17,16 +17,27 @@ namespace ZatcaSDKNetFx48
 
             try
             {
+
                 //Onboarding
                 Console.WriteLine($"\nI. ONBOARDING PROCESS\n\n");
                 var onboardingResult = await zatcaService.OnboardingDevice();
 
+                //Save OnboardingInfo
+                var ObboardingJsonPath = @"..\..\Data\MyCertificate\ObboardingInfo.json";
+                Helpers.SerializeToFile(onboardingResult, ObboardingJsonPath); 
 
-                Console.WriteLine($"\n\nII. ONBOARDING PROCESS\n\n");
+                // onboarding step is done here, we need to safe all onboarding info to use on approval invoice process
+                //=================================                
 
+                
+                Console.WriteLine($"\n\nII. APPROVAL PROCESS\n\n");
                 //Send Invoice
+                
                 XmlDocument document = new XmlDocument() { PreserveWhitespace = true };
                 document.Load(@"..\..\Data\InvSample\CleanSimplified_Invoice.xml");
+
+                //Load OnboardingInfo
+                onboardingResult = Helpers.DeserializeFromFile(ObboardingJsonPath);
 
                 XmlDocument newDoc;
 

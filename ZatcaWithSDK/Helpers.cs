@@ -15,6 +15,20 @@ namespace ZatcaWithSDK
         public const string ComplianceCheckUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/compliance/invoices";
         public const string ReportingUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single";
         public const string ClearanceUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/clearance/single";
+
+        public static void SerializeToFile(OnboardingResult onboardingResult, string filePath)
+        {
+            var json = JsonConvert.SerializeObject(onboardingResult, Newtonsoft.Json.Formatting.Indented);
+            File.WriteAllText(filePath, json);
+            Console.WriteLine("Data has been serialized to the file.");
+        }
+
+        public static OnboardingResult DeserializeFromFile(string filePath)
+        {
+            var json = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<OnboardingResult>(json);
+        }
+
         public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBynaryToken, string privateKey)
         {
 

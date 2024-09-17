@@ -70,5 +70,8 @@
     <Content Include="Data\Rules\schematrons\20210819_ZATCA_E-invoice_Validation_Rules.xsl" />
     <Content Include="Data\Rules\schematrons\CEN-EN16931-UBL.xsl" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\MyCertificate\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

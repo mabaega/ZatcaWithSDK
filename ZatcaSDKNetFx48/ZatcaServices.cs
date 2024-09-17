@@ -13,9 +13,9 @@ using static ZatcaSDKNetFx48.Models;
 //This code demonstrates how to use the Zatca.e Invoice Library.
 public class ZatcaService
 {
-    public async Task<OnboardingResultDto> OnboardingDevice()
+    public async Task<OnboardingResult> OnboardingDevice()
     {
-        var onboardingResult = new OnboardingResultDto();
+        var onboardingResult = new OnboardingResult();
 
         try
         {

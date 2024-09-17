@@ -1,9 +1,8 @@
-﻿using System.Net.Http.Headers;
+﻿using Newtonsoft.Json;
+using System.Net.Http.Headers;
 using System.Text;
-using Zatca.EInvoice.SDK.Contracts.Models;
-using Zatca.EInvoice.SDK;
-using Newtonsoft.Json;
 using System.Xml;
+using Zatca.EInvoice.SDK.Contracts.Models;
 using ZatcaWithSDK;
 using static ZatcaWithSDK.Models;
 
@@ -164,7 +163,7 @@ public class ZatcaService
                 var resultContent = await response.Content.ReadAsStringAsync();
                 zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
             }
-            
+
             onboardingResult.PCSIDBinaryToken = zatcaResult.BinarySecurityToken;
             onboardingResult.PCSIDSecret = zatcaResult.Secret;
 
@@ -175,7 +174,7 @@ public class ZatcaService
         }
 
         catch (Exception ex)
-        
+
         {
             Console.WriteLine($"Error during onboarding: {ex.Message}");
             throw;

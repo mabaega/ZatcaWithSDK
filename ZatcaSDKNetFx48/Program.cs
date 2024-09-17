@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Threading.Tasks;
 using System.Xml;
 using Zatca.EInvoice.SDK.Contracts.Models;
 using static ZatcaSDKNetFx48.Models;
-using System.Threading.Tasks;
 
 namespace ZatcaSDKNetFx48
 {
@@ -27,7 +27,7 @@ namespace ZatcaSDKNetFx48
                 //Send Invoice
                 XmlDocument document = new XmlDocument() { PreserveWhitespace = true };
                 document.Load(@"..\..\Data\InvSample\CleanSimplified_Invoice.xml");
-                
+
                 XmlDocument newDoc;
 
                 var ICV = "0";
@@ -44,7 +44,7 @@ namespace ZatcaSDKNetFx48
 
                 //Standard Invoice
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", new Guid().ToString(), "0100000", "388", ICV, PIH,"");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", new Guid().ToString(), "0100000", "388", ICV, PIH, "");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.PCSIDBinaryToken, onboardingResult.PrivateKey);
                 serverResult = await Helpers.GetApproval(onboardingResult.PCSIDBinaryToken, onboardingResult.PCSIDSecret, requestResult.InvoiceRequest, true);
                 if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))

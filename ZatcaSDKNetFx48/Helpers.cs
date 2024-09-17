@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Net.Http.Headers;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Zatca.EInvoice.SDK.Contracts.Models;
 using Zatca.EInvoice.SDK;
+using Zatca.EInvoice.SDK.Contracts.Models;
 using static ZatcaSDKNetFx48.Models;
 
 namespace ZatcaSDKNetFx48
@@ -71,7 +71,7 @@ namespace ZatcaSDKNetFx48
                 pihNode.InnerText = pih;
             }
 
-            
+
             if (!string.IsNullOrEmpty(instructionNote))
             {
                 // Add the InstructionNote element
@@ -141,9 +141,9 @@ namespace ZatcaSDKNetFx48
             try
             {
                 var requestUri = IsClearance ? ClearanceUrl : ReportingUrl;
-                
+
                 ServerResult serverResult;
-                
+
                 using (HttpClient _httpClient = new HttpClient())
                 {
 

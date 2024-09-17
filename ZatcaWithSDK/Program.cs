@@ -25,7 +25,7 @@ namespace ZatcaWithSDK
                 //Send Invoice
                 XmlDocument document = new XmlDocument() { PreserveWhitespace = true };
                 document.Load(@"..\..\..\Data\InvSample\CleanSimplified_Invoice.xml");
-                
+
                 XmlDocument newDoc;
 
                 var ICV = "0";
@@ -42,7 +42,7 @@ namespace ZatcaWithSDK
 
                 //Standard Invoice
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", new Guid().ToString(), "0100000", "388", ICV, PIH,"");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", new Guid().ToString(), "0100000", "388", ICV, PIH, "");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.PCSIDBinaryToken, onboardingResult.PrivateKey);
                 serverResult = await Helpers.GetApproval(onboardingResult.PCSIDBinaryToken, onboardingResult.PCSIDSecret, requestResult.InvoiceRequest, true);
                 if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))

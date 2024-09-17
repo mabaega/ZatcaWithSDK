@@ -1,13 +1,13 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using Zatca.EInvoice.SDK.Contracts.Models;
-using Newtonsoft.Json;
-using System.Xml;
-using System.Threading.Tasks;
-using static ZatcaSDKNetFx48.Models;
+﻿using Newtonsoft.Json;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
+using Zatca.EInvoice.SDK.Contracts.Models;
 using ZatcaSDKNetFx48;
+using static ZatcaSDKNetFx48.Models;
 
 
 //This code demonstrates how to use the Zatca.e Invoice Library.
@@ -167,7 +167,7 @@ public class ZatcaService
                 var resultContent = await response.Content.ReadAsStringAsync();
                 zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
             }
-            
+
             onboardingResult.PCSIDBinaryToken = zatcaResult.BinarySecurityToken;
             onboardingResult.PCSIDSecret = zatcaResult.Secret;
 
@@ -178,7 +178,7 @@ public class ZatcaService
         }
 
         catch (Exception ex)
-        
+
         {
             Console.WriteLine($"Error during onboarding: {ex.Message}");
             throw;

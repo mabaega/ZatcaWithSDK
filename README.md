@@ -9,6 +9,7 @@ This code is full step to get Integrating with Zatca
    - Get Compliance CSID
    - Sending Sample Invoice to Compliance Check Url (Standar, Credit Note and Debit Note for Standard and Simplified)
    - Get Production CSID
+   - Save OnboardingInfo to File as Reference for Approval Process
       
 2. Invoice Approval
    - Standard Invoice

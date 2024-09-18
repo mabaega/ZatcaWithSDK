@@ -1,6 +1,6 @@
 # Zatca eInvoice SDK Library In Action
 
-This is sample Code how to use .Net 8  and NET Framework 4.8 Zatca eInvoice SDK library (*zatca-einvoicing-sdk-238-R3.3.5*) provided by Zatca.
+This is sample C# Code how to use .Net 8  and NET Framework 4.8 Zatca eInvoice SDK library (*zatca-einvoicing-sdk-238-R3.3.5*) provided by Zatca.
 
 This code is full step to get Integrating with Zatca
 

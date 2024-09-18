@@ -11,7 +11,7 @@ This code is full step to get Integrating with Zatca
    - Get Production CSID
    - Save OnboardingInfo to File as Reference for Approval Process
       
-2. Invoice Approval
+2. Invoice Approval (Clearance & Report) 
    - Standard Invoice
    - Standard Credit Note
    - Standard Debit Note
@@ -21,8 +21,7 @@ This code is full step to get Integrating with Zatca
 
 All Done In Sandbox Protal (Non Production Environtment) and Should not any Problem for Simulation and Production Environment
 
-It just Simple code, that show how working with Zatca SDK.
-ofcourse, we can use another feature that provided in Zatca SDK
+It just Simple code, that show how working with Zatca SDK.  Ofcourse, we can use another feature that provided in Zatca SDK
 
 Reference :
 - https://zatca.gov.sa/en/E-Invoicing/Pages/default.aspx

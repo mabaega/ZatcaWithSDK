@@ -16,14 +16,15 @@ namespace ZatcaWithSDK
             try
             {
                 //Onboarding
-                Console.WriteLine($"\nI. ONBOARDING PROCESS\n\n");
-                var onboardingResult = await zatcaService.OnboardingDevice();
+                Console.WriteLine($"\nI. ONBOARDING PROCESS\n\n");  //comented this line when first onboarding success
+                var onboardingResult = await zatcaService.OnboardingDevice();  //comented this line when first onboarding success
 
                 //Save OnboardingInfo
                 var ObboardingJsonPath = @"..\..\..\Data\MyCertificate\ObboardingInfo.json";
                 Helpers.SerializeToFile(onboardingResult, ObboardingJsonPath);
 
                 // onboarding step is done here, we need to safe all onboarding info to use on approval invoice process
+               
                 //=================================                
 
 

@@ -73,11 +73,9 @@
 			</cac:PartyLegalEntity>
 		</cac:Party>
 	</cac:AccountingCustomerParty>
-  <cac:Delivery>
-    <cbc:ActualDeliveryDate>2022-09-07</cbc:ActualDeliveryDate>
-  </cac:Delivery>
 	<cac:PaymentMeans>
 		<cbc:PaymentMeansCode>10</cbc:PaymentMeansCode>
+	
 	</cac:PaymentMeans>
 	<cac:AllowanceCharge>
 		<cbc:ChargeIndicator>false</cbc:ChargeIndicator>

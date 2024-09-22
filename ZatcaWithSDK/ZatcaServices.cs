@@ -70,7 +70,7 @@ public class ZatcaService
 
             //Step 3. Sending Sample Document
             XmlDocument document = new XmlDocument() { PreserveWhitespace = true };
-            document.Load(@"..\..\..\Data\InvSample\CleanSimplified_Invoice.xml");
+            document.Load(Helpers.GetFullPath(@"Data/InvSample/CleanSimplified_Invoice.xml"));
             XmlDocument newDoc;
 
             var ICV = "0";

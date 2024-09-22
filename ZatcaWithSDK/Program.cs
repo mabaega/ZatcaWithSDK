@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System.Text;
 using System.Xml;
-using Zatca.EInvoice.SDK;
 using static ZatcaWithSDK.Models;
 
 namespace ZatcaWithSDK
@@ -16,7 +14,7 @@ namespace ZatcaWithSDK
 
             try
             {
-                var ObboardingJsonPath = @"..\..\..\Data\MyCertificate\ObboardingInfo.json";
+                var onboardingJsonPath = Helpers.GetFullPath(@"Data/MyCertificate/ObboardingInfo.json");
 
 
                 //Commented this block after 1st run with successfully onboarding
@@ -25,7 +23,7 @@ namespace ZatcaWithSDK
                 Console.WriteLine($"\nI. ONBOARDING PROCESS\n\n");
                 var onboardingResult = await zatcaService.OnboardingDevice();
                 //Save OnboardingInfo
-                Helpers.SerializeToFile(onboardingResult, ObboardingJsonPath);
+                Helpers.SerializeToFile(onboardingResult, onboardingJsonPath);
 
                 #endregion
 
@@ -33,10 +31,10 @@ namespace ZatcaWithSDK
                 Console.WriteLine($"\n\nII. APPROVAL PROCESS\n\n");
 
                 //Load CertificateInfo
-                OnboardingResult certificateInfo = Helpers.DeserializeFromFile(ObboardingJsonPath);
+                OnboardingResult certificateInfo = Helpers.DeserializeFromFile(onboardingJsonPath);
 
                 XmlDocument document = new() { PreserveWhitespace = true };
-                document.Load(@"..\..\..\Data\InvSample\CleanSimplified_Invoice.xml");
+                document.Load(Helpers.GetFullPath(@"Data/InvSample/CleanSimplified_Invoice.xml"));
 
                 XmlDocument newDoc;
 

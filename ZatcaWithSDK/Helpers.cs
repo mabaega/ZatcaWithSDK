@@ -16,6 +16,15 @@ namespace ZatcaWithSDK
         public const string ReportingUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single";
         public const string ClearanceUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/clearance/single";
 
+        public static string GetFullPath(string relativePath)
+        {
+            string basePath = AppDomain.CurrentDomain.BaseDirectory;
+            string adjustedPath = Environment.OSVersion.Platform == PlatformID.Win32NT
+                ? Path.Combine("..", "..", "..", relativePath)
+                : Path.Combine("..", "..", relativePath);
+
+            return Path.GetFullPath(Path.Combine(basePath, adjustedPath));
+        }
         public static void SerializeToFile(OnboardingResult onboardingResult, string filePath)
         {
             var json = JsonConvert.SerializeObject(onboardingResult, Newtonsoft.Json.Formatting.Indented);

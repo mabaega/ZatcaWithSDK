@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZatcaWithSDK", "ZatcaWithSD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZatcaSDKNetFx48", "ZatcaSDKNetFx48\ZatcaSDKNetFx48.csproj", "{C9F8348C-E0DE-4CA8-A8DA-B2EF6379B6D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDKValidation", "SDKValidation\SDKValidation.csproj", "{0CD39E5E-E176-4738-A72C-F71ACB66A8B9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{C9F8348C-E0DE-4CA8-A8DA-B2EF6379B6D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9F8348C-E0DE-4CA8-A8DA-B2EF6379B6D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9F8348C-E0DE-4CA8-A8DA-B2EF6379B6D2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0CD39E5E-E176-4738-A72C-F71ACB66A8B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0CD39E5E-E176-4738-A72C-F71ACB66A8B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0CD39E5E-E176-4738-A72C-F71ACB66A8B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0CD39E5E-E176-4738-A72C-F71ACB66A8B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

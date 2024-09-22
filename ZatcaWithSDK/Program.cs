@@ -85,7 +85,7 @@ namespace ZatcaWithSDK
                 Console.WriteLine($"Clearance Standard Debit Note \n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
 
 
-                Console.WriteLine($"\n\n1. Get Simplified Invoice Approval\n\n");
+                Console.WriteLine($"\n\n2. Get Simplified Invoice Approval\n\n");
 
                 //simplified Invoice
                 ICV += ICV;

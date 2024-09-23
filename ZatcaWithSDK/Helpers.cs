@@ -23,6 +23,7 @@ namespace ZatcaWithSDK
                 ? Path.Combine("..", "..", "..", relativePath)
                 : Path.Combine("..", "..", relativePath);
 
+            //Console.WriteLine(Path.GetFullPath(Path.Combine(basePath, adjustedPath)));
             return Path.GetFullPath(Path.Combine(basePath, adjustedPath));
         }
         public static void SerializeToFile(OnboardingResult onboardingResult, string filePath)
@@ -41,14 +42,14 @@ namespace ZatcaWithSDK
         public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBynaryToken, string privateKey)
         {
 
-            string ccsidBinaryTokenString = Encoding.UTF8.GetString(Convert.FromBase64String(csidBynaryToken));
-            SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, ccsidBinaryTokenString, privateKey);
+            string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(csidBynaryToken));
+            SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
             RequestResult requestResult = new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
 
             return requestResult;
         }
 
-        public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string uuid, string invoiceTypeCodename, string invoiceTypeCodeValue, string icv, string pih, string instructionNote)
+        public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string invoiceTypeCodename, string invoiceTypeCodeValue, string icv, string pih, string instructionNote)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
@@ -56,6 +57,9 @@ namespace ZatcaWithSDK
 
             XmlDocument newDoc = (XmlDocument)doc.CloneNode(true);
 
+            Guid newGuid = Guid.NewGuid();
+            string guidString = newGuid.ToString();
+          
             XmlNode idNode = newDoc.SelectSingleNode("//cbc:ID", nsmgr);
             if (idNode != null)
             {
@@ -65,7 +69,7 @@ namespace ZatcaWithSDK
             XmlNode uuidNode = newDoc.SelectSingleNode("//cbc:UUID", nsmgr);
             if (uuidNode != null)
             {
-                uuidNode.InnerText = uuid;
+                uuidNode.InnerText = guidString;
             }
 
             XmlNode invoiceTypeCodeNode = newDoc.SelectSingleNode("//cbc:InvoiceTypeCode", nsmgr);
@@ -115,7 +119,6 @@ namespace ZatcaWithSDK
 
             return newDoc;
         }
-
 
 
         public static async Task<ServerResult> ComplianceCheck(string ccsidBinaryToken, string ccsidSecret, InvoiceRequest requestApi)
@@ -192,7 +195,7 @@ namespace ZatcaWithSDK
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during compliance check: {ex.Message}");
+                Console.WriteLine($"Error during {(IsClearance ? "Clearance" : "Reporting")}: {ex.Message}");
                 throw;
             }
         }

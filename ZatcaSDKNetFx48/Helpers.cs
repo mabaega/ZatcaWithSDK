@@ -44,13 +44,16 @@ namespace ZatcaSDKNetFx48
             return requestResult;
         }
 
-        public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string uuid, string invoiceTypeCodename, string invoiceTypeCodeValue, string icv, string pih, string instructionNote)
+        public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string invoiceTypeCodename, string invoiceTypeCodeValue, string icv, string pih, string instructionNote)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
             nsmgr.AddNamespace("cac", "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2");
 
             XmlDocument newDoc = (XmlDocument)doc.CloneNode(true);
+
+            Guid newGuid = Guid.NewGuid();
+            string guidString = newGuid.ToString();
 
             XmlNode idNode = newDoc.SelectSingleNode("//cbc:ID", nsmgr);
             if (idNode != null)
@@ -61,7 +64,7 @@ namespace ZatcaSDKNetFx48
             XmlNode uuidNode = newDoc.SelectSingleNode("//cbc:UUID", nsmgr);
             if (uuidNode != null)
             {
-                uuidNode.InnerText = uuid;
+                uuidNode.InnerText = guidString;
             }
 
             XmlNode invoiceTypeCodeNode = newDoc.SelectSingleNode("//cbc:InvoiceTypeCode", nsmgr);

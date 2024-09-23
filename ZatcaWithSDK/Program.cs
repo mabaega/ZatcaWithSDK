@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Reflection;
 using System.Xml;
 using static ZatcaWithSDK.Models;
 
@@ -8,6 +9,7 @@ namespace ZatcaWithSDK
     {
         static async Task Main(string[] args)
         {
+           
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
             var zatcaService = new ZatcaService();
@@ -18,6 +20,7 @@ namespace ZatcaWithSDK
 
 
                 //Commented this block after 1st run with successfully onboarding
+
                 #region "Onboarding" 
 
                 Console.WriteLine($"\nI. ONBOARDING PROCESS\n\n");
@@ -52,7 +55,7 @@ namespace ZatcaWithSDK
 
                 //Standard Invoice
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", new Guid().ToString(), "0100000", "388", ICV, PIH, "");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001",  "0100000", "388", ICV, PIH, "");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
                 serverResult = await Helpers.GetApproval(certificateInfo.PCSIDBinaryToken, certificateInfo.PCSIDSecret, requestResult.InvoiceRequest, true);
                 if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
@@ -63,7 +66,7 @@ namespace ZatcaWithSDK
 
                 //Standard CreditNote
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001", new Guid().ToString(), "0100000", "383", ICV, PIH, "Standard CreditNote");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001",  "0100000", "383", ICV, PIH, "Standard CreditNote");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
                 serverResult = await Helpers.GetApproval(certificateInfo.PCSIDBinaryToken, certificateInfo.PCSIDSecret, requestResult.InvoiceRequest, true);
                 if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
@@ -71,9 +74,10 @@ namespace ZatcaWithSDK
                     PIH = requestResult.InvoiceRequest.InvoiceHash;
                 }
                 Console.WriteLine($"Clearance Standard Credit Note \n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
+
                 //Standard DebitNote
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001", new Guid().ToString(), "0100000", "381", ICV, PIH, "Standard DebitNote");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001",  "0100000", "381", ICV, PIH, "Standard DebitNote");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
                 serverResult = await Helpers.GetApproval(certificateInfo.PCSIDBinaryToken, certificateInfo.PCSIDSecret, requestResult.InvoiceRequest, true);
                 if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
@@ -87,7 +91,7 @@ namespace ZatcaWithSDK
 
                 //simplified Invoice
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", new Guid().ToString(), "0200000", "388", ICV, PIH, "");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001",  "0200000", "388", ICV, PIH, "");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
                 serverResult = await Helpers.GetApproval(certificateInfo.PCSIDBinaryToken, certificateInfo.PCSIDSecret, requestResult.InvoiceRequest, false);
                 if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
@@ -100,7 +104,7 @@ namespace ZatcaWithSDK
                 string pihforvalidation = string.Empty;
 
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001", new Guid().ToString(), "0200000", "383", ICV, PIH, "simplified CreditNote");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001",  "0200000", "383", ICV, PIH, "simplified CreditNote");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
                 serverResult = await Helpers.GetApproval(certificateInfo.PCSIDBinaryToken, certificateInfo.PCSIDSecret, requestResult.InvoiceRequest, false);
                 if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
@@ -112,7 +116,7 @@ namespace ZatcaWithSDK
 
                 //simplified DebitNote
                 ICV += ICV;
-                newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001", new Guid().ToString(), "0200000", "381", ICV, PIH, "simplified DebitNote");
+                newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001",  "0200000", "381", ICV, PIH, "simplified DebitNote");
                 requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
                 serverResult = await Helpers.GetApproval(certificateInfo.PCSIDBinaryToken, certificateInfo.PCSIDSecret, requestResult.InvoiceRequest, false);
                 if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))

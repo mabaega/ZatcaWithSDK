@@ -85,7 +85,7 @@ public class ZatcaService
 
             //Standard Invoice
             ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", new Guid().ToString(), "0100000", "388", ICV, PIH, "");
+            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001",  "0100000", "388", ICV, PIH, "");
             requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
             serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
             if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
@@ -95,7 +95,7 @@ public class ZatcaService
 
             //Standard CreditNote
             ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001", new Guid().ToString(), "0100000", "383", ICV, PIH, "Standard CreditNote");
+            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001",  "0100000", "383", ICV, PIH, "Standard CreditNote");
             requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
             serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
             if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
@@ -105,7 +105,7 @@ public class ZatcaService
 
             //Standard DebitNote
             ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001", new Guid().ToString(), "0100000", "381", ICV, PIH, "Standard DebitNote");
+            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001",  "0100000", "381", ICV, PIH, "Standard DebitNote");
             requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
             serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
             if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
@@ -116,7 +116,7 @@ public class ZatcaService
 
             //simplified Invoice
             ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", new Guid().ToString(), "0200000", "388", ICV, PIH, "");
+            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001",  "0200000", "388", ICV, PIH, "");
             requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
             serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
             if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
@@ -126,7 +126,7 @@ public class ZatcaService
 
             //simplified CreditNote
             ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001", new Guid().ToString(), "0200000", "383", ICV, PIH, "simplified CreditNote");
+            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001",  "0200000", "383", ICV, PIH, "simplified CreditNote");
             requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
             serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
             if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
@@ -136,7 +136,7 @@ public class ZatcaService
 
             //simplified DebitNote
             ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001", new Guid().ToString(), "0200000", "381", ICV, PIH, "simplified DebitNote");
+            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001",  "0200000", "381", ICV, PIH, "simplified DebitNote");
             requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
             serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
             if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))

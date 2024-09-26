@@ -1,6 +1,4 @@
-﻿//This code demonstrates how to use the Zatca.e Invoice Library for Onboarding.
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;

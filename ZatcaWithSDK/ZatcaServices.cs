@@ -27,10 +27,25 @@ public class ZatcaService
 
         try
         {
-            await Step1_GenerateCSR(certInfo);
-            await Step2_GetCCSID(certInfo);
-            await Step3_SendSampleDocuments(certInfo);
-            await Step4_GetPCSID(certInfo);
+            if (!await Step1_GenerateCSR(certInfo))
+            {
+                throw new Exception("Step 1 failed: CSR generation failed.");
+            }
+
+            if (!await Step2_GetCCSID(certInfo))
+            {
+                throw new Exception("Step 2 failed: Getting CCSID failed.");
+            }
+
+            if (!await Step3_SendSampleDocuments(certInfo))
+            {
+                throw new Exception("Step 3 failed: Sending sample documents failed.");
+            }
+
+            if (!await Step4_GetPCSID(certInfo))
+            {
+                throw new Exception("Step 4 failed: Getting PCSID failed.");
+            }
 
             return certInfo;
         }
@@ -41,7 +56,7 @@ public class ZatcaService
         }
     }
 
-    private async Task Step1_GenerateCSR(CertificateInfo certInfo)
+    private async Task<bool> Step1_GenerateCSR(CertificateInfo certInfo)
     {
         _logger.LogInformation("\nStep 1: Generating CSR and PrivateKey");
         var csrGenerator = new CsrGenerator();
@@ -49,15 +64,17 @@ public class ZatcaService
 
         if (!csrResult.IsValid)
         {
-            throw new Exception("Failed to generate CSR");
+            _logger.LogInformation("Failed to generate CSR");
+            return false;
         }
 
         certInfo.GeneratedCsr = csrResult.Csr;
         certInfo.PrivateKey = csrResult.PrivateKey;
         _logger.LogInformation("CSR and PrivateKey generated successfully");
+        return true;
     }
 
-    private async Task Step2_GetCCSID(CertificateInfo certInfo)
+    private async Task<bool> Step2_GetCCSID(CertificateInfo certInfo)
     {
         _logger.LogInformation("\nStep 2: Getting Compliance CSID");
 
@@ -72,6 +89,12 @@ public class ZatcaService
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(certInfo.ComplianceCSIDUrl, content);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Failed to get CCSID");
+            return false;
+        }
+
         response.EnsureSuccessStatusCode();
 
         var resultContent = await response.Content.ReadAsStringAsync();
@@ -82,9 +105,10 @@ public class ZatcaService
         certInfo.CCSIDSecret = zatcaResult.Secret;
 
         _logger.LogInformation("CCSID obtained successfully");
+        return true;
     }
 
-    private async Task Step3_SendSampleDocuments(CertificateInfo certInfo)
+    private async Task<bool> Step3_SendSampleDocuments(CertificateInfo certInfo)
     {
         _logger.LogInformation("\nStep 3: Sending Sample Documents");
 
@@ -113,17 +137,30 @@ public class ZatcaService
 
             var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
 
-            if (serverResult == null || (isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus).Contains("NOT"))
+            if (serverResult == null)
             {
-                throw new Exception($"Failed to process {description}");
+                _logger.LogError($"Failed to process {description}: serverResult is null.");
+                return false;
             }
 
-            pih = requestResult.InvoiceRequest.InvoiceHash;
-            _logger.LogInformation($"\n{description} processed successfully");
+            var status = isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus;
+
+            if (status.Contains("REPORTED") || status.Contains("CLEARED"))
+            {
+                pih = requestResult.InvoiceRequest.InvoiceHash;
+                _logger.LogInformation($"\n{description} processed successfully");
+            }
+            else
+            {
+                _logger.LogError($"Failed to process {description}: status is {status}");
+                return false;
+            }
         }
+
+        return true;
     }
 
-    private async Task Step4_GetPCSID(CertificateInfo certInfo)
+    private async Task<bool> Step4_GetPCSID(CertificateInfo certInfo)
     {
         _logger.LogInformation("\nStep 4: Getting Production CSID");
 
@@ -138,6 +175,13 @@ public class ZatcaService
 
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(certInfo.ProductionCSIDUrl, content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Failed to get PCSID");
+            return false;
+        }
+
         response.EnsureSuccessStatusCode();
 
         var resultContent = await response.Content.ReadAsStringAsync();
@@ -147,7 +191,7 @@ public class ZatcaService
         certInfo.PCSIDSecret = zatcaResult.Secret;
 
         _logger.LogInformation($"PCSID obtained successfully\n");
-
+        return true;
     }
 
 }

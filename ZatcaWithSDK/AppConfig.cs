@@ -29,7 +29,7 @@ namespace ZatcaWithSDK
 
         // Modify this Invoice Template @ <cac:AccountingSupplierParty>,
         // when we use real Vat Number / Simulation Environment
-        public static string TemplateInvoicePath { get; set; } = @"../../../Data/InvSample/CleanSimplified_Invoice.xml";
+        public static string TemplateInvoicePath { get; set; } = @"../../../Data/InvSample/TemplateInvoice.xml";
 
         // This file will contain EnvironmentType, Api path and all Certificate Information
         public static string CertificateInfoPath { get; set; } = @"../../../Data/MyCertificate/CertificateInfo.json";

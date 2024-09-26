@@ -1,184 +1,153 @@
-﻿using Newtonsoft.Json;
+﻿//This code demonstrates how to use the Zatca.e Invoice Library for Onboarding.
+
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Xml;
+using Zatca.EInvoice.SDK;
 using Zatca.EInvoice.SDK.Contracts.Models;
 using ZatcaWithSDK;
 using static ZatcaWithSDK.Models;
 
-//This code demonstrates how to use the Zatca.e Invoice Library.
 public class ZatcaService
 {
-    public async Task<OnboardingResult> OnboardingDevice()
+    private readonly HttpClient _httpClient;
+    private readonly ILogger _logger;
+
+    public ZatcaService(HttpClient httpClient, ILogger logger)
     {
-        var onboardingResult = new OnboardingResult();
+        _httpClient = httpClient;
+        _logger = logger;
+    }
+
+    public async Task<CertificateInfo> DeviceOnboarding()
+    {
+        var certInfo = new CertificateInfo();
 
         try
         {
-            // Step 1: Create CSR
+            await Step1_GenerateCSR(certInfo);
+            await Step2_GetCCSID(certInfo);
+            await Step3_SendSampleDocuments(certInfo);
+            await Step4_GetPCSID(certInfo);
 
-            var csrGenerationDto = new CsrGenerationDto
-            (
-                 "TST-886431145-399999999900003",
-                 "1-TST|2-TST|3-ed22f1d8-e6a2-1118-9b58-d9a8f11e445f",
-                 "399999999900003",
-                 "Riyadh Branch",
-                 "Maximum Speed Tech Supply LTD",
-                 "SA",
-                 "1100",
-                 "RRRD2929",
-                 "Supply activities"
-            );
-
-            var csrGenerator = new Zatca.EInvoice.SDK.CsrGenerator();
-            CsrResult csrResult = csrGenerator.GenerateCsr(csrGenerationDto, EnvironmentType.NonProduction, false);
-
-            onboardingResult.GeneratedCsr = csrResult.Csr;
-            onboardingResult.PrivateKey = csrResult.PrivateKey;
-
-            Console.WriteLine($"Step 1\nCSR and PrivateKey Generated Successfully");
-
-
-            // Step 2: Get CCSID
-            const string otp = "12345";
-            ZatcaResultDto zatcaResult;
-
-            var jsonContent = JsonConvert.SerializeObject(new { csr = csrResult.Csr });
-
-            using (HttpClient _httpClient = new HttpClient())
-            {
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
-                _httpClient.DefaultRequestHeaders.Add("OTP", otp);
-                _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
-
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync(Helpers.ComplianceCSIDUrl, content);
-
-                response.EnsureSuccessStatusCode();
-
-                var resultContent = await response.Content.ReadAsStringAsync();
-                zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
-            }
-
-            onboardingResult.CCSIDBinaryToken = zatcaResult.BinarySecurityToken;
-            onboardingResult.CCSIDComplianceRequestId = zatcaResult.RequestID;
-            onboardingResult.CCSIDSecret = zatcaResult.Secret;
-
-            Console.WriteLine($"Step 2\nGET CCSID Successfully");
-
-            //Step 3. Sending Sample Document
-            XmlDocument document = new XmlDocument() { PreserveWhitespace = true };
-            document.Load(Helpers.GetFullPath(@"Data/InvSample/CleanSimplified_Invoice.xml"));
-            XmlDocument newDoc;
-
-            var ICV = "0";
-            var PIH = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
-            RequestResult requestResult;
-            ServerResult serverResult;
-
-
-            //Standard Invoice
-            ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001",  "0100000", "388", ICV, PIH, "");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
-            serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
-            if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
-            {
-                PIH = requestResult.InvoiceRequest.InvoiceHash;
-            }
-
-            //Standard CreditNote
-            ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001",  "0100000", "383", ICV, PIH, "Standard CreditNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
-            serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
-            if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
-            {
-                PIH = requestResult.InvoiceRequest.InvoiceHash;
-            }
-
-            //Standard DebitNote
-            ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001",  "0100000", "381", ICV, PIH, "Standard DebitNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
-            serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
-            if (serverResult != null && !serverResult.ClearanceStatus.Contains("NOT"))
-            {
-                PIH = requestResult.InvoiceRequest.InvoiceHash;
-            }
-
-
-            //simplified Invoice
-            ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001",  "0200000", "388", ICV, PIH, "");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
-            serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
-            if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
-            {
-                PIH = requestResult.InvoiceRequest.InvoiceHash;
-            }
-
-            //simplified CreditNote
-            ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001",  "0200000", "383", ICV, PIH, "simplified CreditNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
-            serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
-            if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
-            {
-                PIH = requestResult.InvoiceRequest.InvoiceHash;
-            }
-
-            //simplified DebitNote
-            ICV += ICV;
-            newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001",  "0200000", "381", ICV, PIH, "simplified DebitNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, onboardingResult.CCSIDBinaryToken, onboardingResult.PrivateKey);
-            serverResult = await Helpers.ComplianceCheck(onboardingResult.CCSIDBinaryToken, onboardingResult.CCSIDSecret, requestResult.InvoiceRequest);
-            if (serverResult != null && !serverResult.ReportingStatus.Contains("NOT"))
-            {
-                PIH = requestResult.InvoiceRequest.InvoiceHash;
-            }
-
-            Console.WriteLine($"Step 3\nSend Sample Invoice Successfully");
-
-            // Step 4: Get PCSID
-
-            jsonContent = JsonConvert.SerializeObject(new { compliance_request_id = zatcaResult.RequestID });
-
-            using (HttpClient _httpClient = new HttpClient())
-            {
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
-                _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                    Convert.ToBase64String(Encoding.ASCII.GetBytes($"{zatcaResult.BinarySecurityToken}:{zatcaResult.Secret}")));
-
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync(Helpers.ProductionCSIDUrl, content);
-
-                response.EnsureSuccessStatusCode();
-
-                var resultContent = await response.Content.ReadAsStringAsync();
-                zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
-            }
-
-            onboardingResult.PCSIDBinaryToken = zatcaResult.BinarySecurityToken;
-            onboardingResult.PCSIDSecret = zatcaResult.Secret;
-
-            Console.WriteLine($"Step 4\nGet PCSID Successfully");
-
-            return onboardingResult;
-
+            return certInfo;
         }
-
         catch (Exception ex)
-
         {
-            Console.WriteLine($"Error during onboarding: {ex.Message}");
+            _logger.LogError($"Error during onboarding: {ex.Message}");
             throw;
         }
+    }
+
+    private async Task Step1_GenerateCSR(CertificateInfo certInfo)
+    {
+        _logger.LogInformation("\nStep 1: Generating CSR and PrivateKey");
+        var csrGenerator = new CsrGenerator();
+        CsrResult csrResult = csrGenerator.GenerateCsr(AppConfig.CsrInfoProperties, AppConfig.EnvironmentType, false);
+
+        if (!csrResult.IsValid)
+        {
+            throw new Exception("Failed to generate CSR");
+        }
+
+        certInfo.GeneratedCsr = csrResult.Csr;
+        certInfo.PrivateKey = csrResult.PrivateKey;
+        _logger.LogInformation("CSR and PrivateKey generated successfully");
+    }
+
+    private async Task Step2_GetCCSID(CertificateInfo certInfo)
+    {
+        _logger.LogInformation("\nStep 2: Getting Compliance CSID");
+
+        var jsonContent = JsonConvert.SerializeObject(new { csr = certInfo.GeneratedCsr });
+
+        _httpClient.DefaultRequestHeaders.Clear();
+        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
+        _httpClient.DefaultRequestHeaders.Add("OTP", AppConfig.OTP);
+        _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
+
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(certInfo.ComplianceCSIDUrl, content);
+
+        response.EnsureSuccessStatusCode();
+
+        var resultContent = await response.Content.ReadAsStringAsync();
+        var zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
+
+        certInfo.CCSIDBinaryToken = zatcaResult.BinarySecurityToken;
+        certInfo.CCSIDComplianceRequestId = zatcaResult.RequestID;
+        certInfo.CCSIDSecret = zatcaResult.Secret;
+
+        _logger.LogInformation("CCSID obtained successfully");
+    }
+
+    private async Task Step3_SendSampleDocuments(CertificateInfo certInfo)
+    {
+        _logger.LogInformation("\nStep 3: Sending Sample Documents");
+
+        XmlDocument baseDocument = new() { PreserveWhitespace = true };
+        baseDocument.Load(Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath));
+
+        var documentTypes = new[] {
+            ("STDSI", "388", "Standard Invoice"),
+            ("STDCN", "383", "Standard CreditNote"),
+            ("STDDN", "381", "Standard DebitNote"),
+            ("SIMSI", "388", "Simplified Invoice"),
+            ("SIMCN", "383", "Simplified CreditNote"),
+            ("SIMDN", "381", "Simplified DebitNote")
+        };
+
+        int icv = 0;
+        string pih = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
+
+        foreach (var (prefix, typeCode, description) in documentTypes)
+        {
+            icv += 1;
+            var isSimplified = prefix.StartsWith("SIM");
+            var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
+
+            var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certInfo.CCSIDBinaryToken, certInfo.PrivateKey);
+
+            var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
+
+            if (serverResult == null || (isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus).Contains("NOT"))
+            {
+                throw new Exception($"Failed to process {description}");
+            }
+
+            pih = requestResult.InvoiceRequest.InvoiceHash;
+            _logger.LogInformation($"\n{description} processed successfully");
+        }
+    }
+
+    private async Task Step4_GetPCSID(CertificateInfo certInfo)
+    {
+        _logger.LogInformation("\nStep 4: Getting Production CSID");
+
+        var jsonContent = JsonConvert.SerializeObject(new { compliance_request_id = certInfo.CCSIDComplianceRequestId });
+
+        _httpClient.DefaultRequestHeaders.Clear();
+        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
+        _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
+            Convert.ToBase64String(Encoding.ASCII.GetBytes($"{certInfo.CCSIDBinaryToken}:{certInfo.CCSIDSecret}")));
+
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(certInfo.ProductionCSIDUrl, content);
+        response.EnsureSuccessStatusCode();
+
+        var resultContent = await response.Content.ReadAsStringAsync();
+        var zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
+
+        certInfo.PCSIDBinaryToken = zatcaResult.BinarySecurityToken;
+        certInfo.PCSIDSecret = zatcaResult.Secret;
+
+        _logger.LogInformation($"PCSID obtained successfully\n");
 
     }
+
 }

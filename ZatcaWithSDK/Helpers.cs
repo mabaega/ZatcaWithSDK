@@ -8,48 +8,40 @@ using static ZatcaWithSDK.Models;
 
 namespace ZatcaWithSDK
 {
-    public class Helpers
+    public static class Helpers
     {
-        public const string ComplianceCSIDUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/compliance";
-        public const string ProductionCSIDUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/production/csids";
-        public const string ComplianceCheckUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/compliance/invoices";
-        public const string ReportingUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/reporting/single";
-        public const string ClearanceUrl = "https://gw-fatoora.zatca.gov.sa/e-invoicing/developer-portal/invoices/clearance/single";
+        private static readonly HttpClient _httpClient = new HttpClient();
 
-        public static string GetFullPath(string relativePath)
+        public static string GetAbsolutePath(string relativePath)
         {
-            string basePath = AppDomain.CurrentDomain.BaseDirectory;
-            string adjustedPath = Environment.OSVersion.Platform == PlatformID.Win32NT
-                ? Path.Combine("..", "..", "..", relativePath)
-                : Path.Combine("..", "..", relativePath);
-
-            //Console.WriteLine(Path.GetFullPath(Path.Combine(basePath, adjustedPath)));
-            return Path.GetFullPath(Path.Combine(basePath, adjustedPath));
+            string baseDirectory = Directory.GetCurrentDirectory();
+            string absolutePath = Path.Combine(baseDirectory, relativePath);
+            string finalPath = Path.GetFullPath(absolutePath);
+            //Console.WriteLine($"{finalPath} : {File.Exists(finalPath)}");
+            return finalPath;
         }
-        public static void SerializeToFile(OnboardingResult onboardingResult, string filePath)
+
+        public static void SerializeToFile<T>(T data, string filePath)
         {
-            var json = JsonConvert.SerializeObject(onboardingResult, Newtonsoft.Json.Formatting.Indented);
+            var json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
             File.WriteAllText(filePath, json);
-            Console.WriteLine("Data has been serialized to the file.");
+            //Console.WriteLine("Data has been serialized to the file.");
         }
 
-        public static OnboardingResult DeserializeFromFile(string filePath)
+        public static T DeserializeFromFile<T>(string filePath)
         {
             var json = File.ReadAllText(filePath);
-            return JsonConvert.DeserializeObject<OnboardingResult>(json);
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBynaryToken, string privateKey)
+        public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBinaryToken, string privateKey)
         {
-
-            string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(csidBynaryToken));
+            string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(csidBinaryToken));
             SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
-            RequestResult requestResult = new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
-
-            return requestResult;
+            return new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
         }
 
-        public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string invoiceTypeCodename, string invoiceTypeCodeValue, string icv, string pih, string instructionNote)
+        public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string invoiceTypeCodename, string invoiceTypeCodeValue, int icv, string pih, string instructionNote)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
             nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
@@ -59,7 +51,7 @@ namespace ZatcaWithSDK
 
             Guid newGuid = Guid.NewGuid();
             string guidString = newGuid.ToString();
-          
+
             XmlNode idNode = newDoc.SelectSingleNode("//cbc:ID", nsmgr);
             if (idNode != null)
             {
@@ -83,10 +75,15 @@ namespace ZatcaWithSDK
                 invoiceTypeCodeNode.InnerText = invoiceTypeCodeValue;
             }
 
-            XmlNode additionalReferenceNode = newDoc.SelectSingleNode("//cac:AdditionalReference[cac:ID='ICV']/cbc:UUID", nsmgr);
+            // Corrected XPath expression
+            XmlNode additionalReferenceNode = newDoc.SelectSingleNode("//cac:AdditionalDocumentReference[cbc:ID='ICV']/cbc:UUID", nsmgr);
             if (additionalReferenceNode != null)
             {
-                additionalReferenceNode.InnerText = icv;
+                additionalReferenceNode.InnerText = icv.ToString();
+            }
+            else
+            {
+                Console.WriteLine("UUID node not found for ICV.");
             }
 
             XmlNode pihNode = newDoc.SelectSingleNode("//cac:AdditionalDocumentReference[cbc:ID='PIH']/cac:Attachment/cbc:EmbeddedDocumentBinaryObject", nsmgr);
@@ -94,7 +91,10 @@ namespace ZatcaWithSDK
             {
                 pihNode.InnerText = pih;
             }
-
+            else
+            {
+                Console.WriteLine("EmbeddedDocumentBinaryObject node not found for PIH.");
+            }
 
             if (!string.IsNullOrEmpty(instructionNote))
             {
@@ -121,81 +121,49 @@ namespace ZatcaWithSDK
         }
 
 
-        public static async Task<ServerResult> ComplianceCheck(string ccsidBinaryToken, string ccsidSecret, InvoiceRequest requestApi)
+        public static async Task<ServerResult> ComplianceCheck(CertificateInfo certInfo, InvoiceRequest requestApi)
         {
-            try
-            {
-                ServerResult serverResult;
-
-                using (HttpClient _httpClient = new HttpClient())
-                {
-
-                    _httpClient.DefaultRequestHeaders.Clear();
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
-                    _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                        Convert.ToBase64String(Encoding.ASCII.GetBytes($"{ccsidBinaryToken}:{ccsidSecret}")));
-
-                    var content = new StringContent(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
-
-                    var response = await _httpClient.PostAsync(ComplianceCheckUrl, content);
-
-                    var resultContent = await response.Content.ReadAsStringAsync();
-
-                    serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
-                    serverResult.StatusCode = $"{(int)response.StatusCode}-{response.StatusCode}";
-                }
-
-                serverResult.RequestType = "Compliance Check";
-                serverResult.RequestUrl = ComplianceCheckUrl;
-
-                return serverResult;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error during compliance check: {ex.Message}");
-                throw;
-            }
+            return await PerformApiRequest(certInfo.ComplianceCheckUrl, requestApi, certInfo.CCSIDBinaryToken, certInfo.CCSIDSecret, "Compliance Check");
         }
 
-        public static async Task<ServerResult> GetApproval(string pcsidBinaryToken, string pcsidSecret, InvoiceRequest requestApi, bool IsClearance)
+        public static async Task<ServerResult> GetApproval(CertificateInfo certInfo, InvoiceRequest requestApi, bool isClearance)
+        {
+            var requestUri = isClearance ? certInfo.ClearanceUrl : certInfo.ReportingUrl;
+            return await PerformApiRequest(requestUri, requestApi, certInfo.PCSIDBinaryToken, certInfo.PCSIDSecret, isClearance ? "Clearance" : "Reporting", isClearance);
+        }
+
+        private static async Task<ServerResult> PerformApiRequest(string requestUri, InvoiceRequest requestApi, string token, string secret, string requestType, bool isClearance = false)
         {
             try
             {
-                var requestUri = IsClearance ? ClearanceUrl : ReportingUrl;
-
-                ServerResult serverResult;
-
-                using (HttpClient _httpClient = new HttpClient())
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
+                _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
+                if (isClearance)
                 {
-
-                    _httpClient.DefaultRequestHeaders.Clear();
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
-                    _httpClient.DefaultRequestHeaders.Add("Clearance-Status", IsClearance ? "1" : "0");
-                    _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                        Convert.ToBase64String(Encoding.ASCII.GetBytes($"{pcsidBinaryToken}:{pcsidSecret}")));
-
-                    var content = new StringContent(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
-
-                    var response = await _httpClient.PostAsync(requestUri, content);
-
-                    var resultContent = await response.Content.ReadAsStringAsync();
-                    serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
-
-                    serverResult.StatusCode = $"{(int)response.StatusCode}-{response.StatusCode}";
+                    _httpClient.DefaultRequestHeaders.Add("Clearance-Status", "1");
                 }
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
+                    Convert.ToBase64String(Encoding.ASCII.GetBytes($"{token}:{secret}")));
 
-                serverResult.RequestType = "Invoice Reporting";
-                serverResult.RequestUrl = ComplianceCheckUrl;
+                var content = new StringContent(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync(requestUri, content);
+
+                var resultContent = await response.Content.ReadAsStringAsync();
+                var serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
+
+                serverResult.StatusCode = $"{(int)response.StatusCode}-{response.StatusCode}";
+                serverResult.RequestType = requestType;
+                serverResult.RequestUrl = requestUri;
+                serverResult.InvoiceHash = requestApi.InvoiceHash;
 
                 return serverResult;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during {(IsClearance ? "Clearance" : "Reporting")}: {ex.Message}");
+                Console.WriteLine($"Error during {requestType}: {ex.Message}");
                 throw;
             }
         }

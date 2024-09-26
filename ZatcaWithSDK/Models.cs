@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Zatca.EInvoice.SDK.Contracts.Models;
 
 namespace ZatcaWithSDK
 {
     public class Models
     {
-
         public class ZatcaResultDto
         {
             public string RequestID { get; set; }
@@ -14,7 +14,7 @@ namespace ZatcaWithSDK
             public string Secret { get; set; }
             public List<string> Errors { get; set; }
         }
-        public class OnboardingResult
+        public class CertificateInfo
         {
             public string GeneratedCsr { get; set; }
             public string PrivateKey { get; set; }
@@ -23,7 +23,32 @@ namespace ZatcaWithSDK
             public string CCSIDSecret { get; set; }
             public string PCSIDBinaryToken { get; set; }
             public string PCSIDSecret { get; set; }
+            public EnvironmentType EnvironmentType { get; set; } = EnvironmentType.NonProduction;
+
+            //Record Last ICV and InvoiceHash
+            public int ICV = 0;
+
+            public string PIH = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
+
+            public string ReportingUrl => GetUrl("invoices/reporting/single");
+            public string ClearanceUrl => GetUrl("invoices/clearance/single");
+            public string ComplianceCSIDUrl => GetUrl("compliance");
+            public string ComplianceCheckUrl => GetUrl("compliance/invoices");
+            public string ProductionCSIDUrl => GetUrl("production/csids");
+            private string GetUrl(string endpoint)
+            {
+                string environment = EnvironmentType switch
+                {
+                    EnvironmentType.NonProduction => "developer-portal",
+                    EnvironmentType.Simulation => "simulation",
+                    EnvironmentType.Production => "core",
+                    _ => "developer-portal"
+                };
+
+                return $"https://gw-fatoora.zatca.gov.sa/e-invoicing/{environment}/{endpoint}";
+            }
         }
+
         public class ServerResult
         {
             [JsonProperty("requestType")]

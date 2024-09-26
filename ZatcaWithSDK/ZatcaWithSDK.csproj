@@ -5,25 +5,20 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Zatca.EInvoice.SDK">
       <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.5\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net8.0\Zatca.EInvoice.SDK.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Zatca.EInvoice.SDK.Contracts">
       <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.5\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net8.0\Zatca.EInvoice.SDK.Contracts.dll</HintPath>
-      <Private>True</Private>
     </Reference>
   </ItemGroup>
 

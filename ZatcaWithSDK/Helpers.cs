@@ -34,10 +34,56 @@ namespace ZatcaWithSDK
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBinaryToken, string privateKey)
+        public static void CopyDirectory(string sourceDir, string destDir)
+        {
+            string dirName = Path.GetFileName(sourceDir.TrimEnd(Path.DirectorySeparatorChar));
+            string destFolder = Path.Combine(destDir, dirName);
+            Directory.CreateDirectory(destFolder);
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string destFile = Path.Combine(destFolder, Path.GetFileName(file));
+                File.Copy(file, destFile, true); // Overwrite the file if it already exists
+            }
+
+            foreach (string subdir in Directory.GetDirectories(sourceDir))
+            {
+                string destSubDir = Path.Combine(destFolder, Path.GetFileName(subdir));
+                Directory.CreateDirectory(destSubDir);
+                CopyDirectory(subdir, destSubDir);
+            }
+        }
+
+        public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBinaryToken, string privateKey, string pih)
         {
             string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(csidBinaryToken));
             SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
+
+            // Validate Signed Invoice *** just test ***
+            EInvoiceValidator eInvoiceValidator = new();
+            var validationResult = eInvoiceValidator.ValidateEInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih);
+            if (validationResult != null) {
+                foreach (var e in validationResult.ValidationSteps)
+                {
+                    Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
+                    if (!e.IsValid)
+                    {
+                        foreach (var x in e.ErrorMessages)
+                        {
+                            Console.WriteLine(x);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var x in e.WarningMessages)
+                        {
+                            Console.WriteLine(x);
+                        }
+                    }
+                       
+                }
+                Console.WriteLine($"Overall Signed Invoice Validation : {validationResult.IsValid}!");
+            }
+
             return new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
         }
 
@@ -119,7 +165,6 @@ namespace ZatcaWithSDK
 
             return newDoc;
         }
-
 
         public static async Task<ServerResult> ComplianceCheck(CertificateInfo certInfo, InvoiceRequest requestApi)
         {

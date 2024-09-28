@@ -1,4 +1,5 @@
-﻿//This code demonstrates how to use the Zatca.eInvoice.SDK Library.
+﻿// This code demonstrates how to use the Zatca.eInvoice.SDK Library.
+// Please make sure we copy ikvm folder from Test folder in Zatca eInvoice SDK to \bin\Debug\net8.0
 
 using System.Xml;
 using Newtonsoft.Json;
@@ -15,13 +16,20 @@ class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        // Create logger factory and configure logging filters
+
+        // Handle Schematrons error on validation method
+
+        //string sourceDir = Helpers.GetAbsolutePath(@"../../../ikvm");
+        //string destDir = AppDomain.CurrentDomain.BaseDirectory;
+        //Helpers.CopyDirectory(sourceDir, destDir);
+        //Console.WriteLine("Copy operation completed.");
+
         using var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder
-                .AddFilter("Microsoft", LogLevel.Warning) // Filter for Microsoft libraries
-                .AddFilter("System", LogLevel.Warning)    // Filter for System libraries
-                .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug) // Debug level for your app
+                .AddFilter("Microsoft", LogLevel.Warning) 
+                .AddFilter("System", LogLevel.Warning) 
+                .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
                 .AddConsole(options =>
                 {
                     options.FormatterName = "custom";
@@ -81,19 +89,19 @@ class Program
 
         // Standard Invoice
         var newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", "0100000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
+        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
         var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
         LogServerResult(serverResult, "Clearance Standard Credit Note", logger);
 
         // Standard Credit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001", "0100000", "383", certificateInfo.ICV + 1, certificateInfo.PIH, "Standard CreditNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
         LogServerResult(serverResult,  "Clearance Standard Credit Note", logger);
 
         // Standard Debit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001", "0100000", "381", certificateInfo.ICV + 1, certificateInfo.PIH, "Standard DebitNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
         LogServerResult(serverResult, "Clearance Standard Debit Note", logger);
     }
@@ -105,19 +113,19 @@ class Program
         // Simplified Invoice
 
         var newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", "0200000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
+        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
         var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
         LogServerResult(serverResult, "Reporting Simplified Invoice", logger);
 
         // Simplified Credit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001", "0200000", "383", certificateInfo.ICV + 1, certificateInfo.PIH, "simplified CreditNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
         LogServerResult(serverResult, "Reporting Simplified Credit Note", logger);
 
         // Simplified Debit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001", "0200000", "381", certificateInfo.ICV +1, certificateInfo.PIH, "simplified DebitNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
         LogServerResult(serverResult, "Reporting Simplified Debit Note", logger);
     }

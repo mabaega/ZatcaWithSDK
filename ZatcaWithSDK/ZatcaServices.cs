@@ -108,33 +108,40 @@ public class ZatcaService
 
     private async Task<bool> Step3_SendSampleDocuments(CertificateInfo certInfo)
     {
-        _logger.LogInformation("\nStep 3: Sending Sample Documents");
+        _logger.LogInformation("\nStep 3: Sending Sample Documents\n");
 
         XmlDocument baseDocument = new() { PreserveWhitespace = true };
-        baseDocument.Load(Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath));
+        string templatePath = Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath);
+        
+        baseDocument.Load(templatePath);
 
         var documentTypes = new[] {
-            ("STDSI", "388", "Standard Invoice"),
-            ("STDCN", "383", "Standard CreditNote"),
-            ("STDDN", "381", "Standard DebitNote"),
-            ("SIMSI", "388", "Simplified Invoice"),
-            ("SIMCN", "383", "Simplified CreditNote"),
-            ("SIMDN", "381", "Simplified DebitNote")
-        };
+        ("STDSI", "388", "Standard Invoice"),
+        ("STDCN", "383", "Standard CreditNote"),
+        ("STDDN", "381", "Standard DebitNote"),
+        ("SIMSI", "388", "Simplified Invoice"),
+        ("SIMCN", "383", "Simplified CreditNote"),
+        ("SIMDN", "381", "Simplified DebitNote")
+    };
 
         int icv = 0;
         string pih = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
 
-        foreach (var (prefix, typeCode, description) in documentTypes)
+        for (int i = 0; i < documentTypes.Length; i++)
         {
+            var (prefix, typeCode, description) = documentTypes[i];
             icv += 1;
+
             var isSimplified = prefix.StartsWith("SIM");
-            var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
 
-            var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certInfo.CCSIDBinaryToken, certInfo.PrivateKey);
+            _logger.LogInformation($"Processing {description}...");
 
+            var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
+
+            var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certInfo.CCSIDBinaryToken, certInfo.PrivateKey, pih);
+          
             var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
-
+          
             if (serverResult == null)
             {
                 _logger.LogError($"Failed to process {description}: serverResult is null.");
@@ -146,17 +153,21 @@ public class ZatcaService
             if (status.Contains("REPORTED") || status.Contains("CLEARED"))
             {
                 pih = requestResult.InvoiceRequest.InvoiceHash;
-                _logger.LogInformation($"\n{description} processed successfully");
+                _logger.LogInformation($"\n{description} processed successfully\n\n");
             }
             else
             {
                 _logger.LogError($"Failed to process {description}: status is {status}");
                 return false;
             }
+
+            await Task.Delay(200);
         }
 
         return true;
     }
+
+
 
     private async Task<bool> Step4_GetPCSID(CertificateInfo certInfo)
     {

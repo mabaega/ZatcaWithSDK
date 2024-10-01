@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Xml;
@@ -61,7 +62,8 @@ namespace ZatcaWithSDK
             // Validate Signed Invoice *** just test ***
             EInvoiceValidator eInvoiceValidator = new();
             var validationResult = eInvoiceValidator.ValidateEInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih);
-            if (validationResult != null) {
+            if (validationResult != null)
+            {
                 foreach (var e in validationResult.ValidationSteps)
                 {
                     Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
@@ -79,7 +81,7 @@ namespace ZatcaWithSDK
                             Console.WriteLine(x);
                         }
                     }
-                       
+
                 }
                 Console.WriteLine($"Overall Signed Invoice Validation : {validationResult.IsValid}!");
             }
@@ -179,6 +181,7 @@ namespace ZatcaWithSDK
 
         private static async Task<ServerResult> PerformApiRequest(string requestUri, InvoiceRequest requestApi, string token, string secret, string requestType, bool isClearance = false)
         {
+
             try
             {
                 _httpClient.DefaultRequestHeaders.Clear();

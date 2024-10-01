@@ -16,6 +16,10 @@ class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+        //await Class1.Test();
+        
+        //return;
+
 
         // Handle Schematrons error on validation method
 

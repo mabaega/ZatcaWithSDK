@@ -23,6 +23,10 @@ All Done In Sandbox Protal (Non Production Environtment) and Should not any Prob
 
 It just Simple code, that show how working with Zatca SDK.  Ofcourse, we can use another feature that provided in Zatca SDK
 
+Please make sure we copy ikvm folder from Test folder in Zatca eInvoice SDK to \bin\Debug\net8.0 if we want to use Validation Method from Zatca.eInvoice.SDK.
+
+**eInvoice Validation is not working properly at the moment.**
+
 Reference :
 - https://zatca.gov.sa/en/E-Invoicing/Pages/default.aspx
 - https://sandbox.zatca.gov.sa/downloadSDK

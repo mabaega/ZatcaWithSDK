@@ -1,12 +1,9 @@
-﻿using System;
-using System.Net.Http;
+﻿using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-using Newtonsoft.Json;
-using Zatca.EInvoice.SDK.Contracts.Models;
 using Zatca.EInvoice.SDK;
+using Zatca.EInvoice.SDK.Contracts.Models;
 
 namespace ZatcaWithSDK
 {
@@ -27,8 +24,8 @@ namespace ZatcaWithSDK
 
             string _xmlInvoicePath = @"C:\Tmp\XmlTest\SimplifiedTest.xml";
             XmlDocument xmlInvoice = new() { PreserveWhitespace = true };
-            xmlInvoice.Load(_xmlInvoicePath); 
- 
+            xmlInvoice.Load(_xmlInvoicePath);
+
             // Signing Document
             SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(xmlInvoice, x509CertificateContent, PrivateKey);
 

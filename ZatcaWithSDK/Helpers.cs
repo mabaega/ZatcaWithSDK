@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Xml;
@@ -11,8 +10,7 @@ namespace ZatcaWithSDK
 {
     public static class Helpers
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
-
+        private static readonly HttpClient _httpClient = new();
         public static string GetAbsolutePath(string relativePath)
         {
             string baseDirectory = Directory.GetCurrentDirectory();
@@ -35,38 +33,48 @@ namespace ZatcaWithSDK
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static void CopyDirectory(string sourceDir, string destDir)
+        public static void CopyDirectory(string sourceDir, string destinationDir)
         {
-            string dirName = Path.GetFileName(sourceDir.TrimEnd(Path.DirectorySeparatorChar));
-            string destFolder = Path.Combine(destDir, dirName);
-            Directory.CreateDirectory(destFolder);
+            Directory.CreateDirectory(destinationDir);
             foreach (string file in Directory.GetFiles(sourceDir))
             {
-                string destFile = Path.Combine(destFolder, Path.GetFileName(file));
-                File.Copy(file, destFile, true); // Overwrite the file if it already exists
+                string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
+                File.Copy(file, destFile, true);
             }
-
-            foreach (string subdir in Directory.GetDirectories(sourceDir))
+            foreach (string subDir in Directory.GetDirectories(sourceDir))
             {
-                string destSubDir = Path.Combine(destFolder, Path.GetFileName(subdir));
-                Directory.CreateDirectory(destSubDir);
-                CopyDirectory(subdir, destSubDir);
+                string destSubDir = Path.Combine(destinationDir, Path.GetFileName(subDir));
+                CopyDirectory(subDir, destSubDir);
             }
         }
 
-        public static RequestResult GenerateSignedRequestApi(XmlDocument document, string csidBinaryToken, string privateKey, string pih)
+        public static RequestResult GenerateSignedRequestApi(XmlDocument document, CertificateInfo certInfo, string pih, bool isForCompliance = false)
         {
-            string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(csidBinaryToken));
+            string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(isForCompliance ? certInfo.CCSIDBinaryToken : certInfo.PCSIDBinaryToken));
+            string privateKey = certInfo.PrivateKey;
+
+            //Test use Certificate and privatekey from Zatca eInvoice SDK
+            if (certInfo.EnvironmentType == EnvironmentType.NonProduction)
+            {
+                x509CertificateContent = "MIID3jCCA4SgAwIBAgITEQAAOAPF90Ajs/xcXwABAAA4AzAKBggqhkjOPQQDAjBiMRUwEwYKCZImiZPyLGQBGRYFbG9jYWwxEzARBgoJkiaJk/IsZAEZFgNnb3YxFzAVBgoJkiaJk/IsZAEZFgdleHRnYXp0MRswGQYDVQQDExJQUlpFSU5WT0lDRVNDQTQtQ0EwHhcNMjQwMTExMDkxOTMwWhcNMjkwMTA5MDkxOTMwWjB1MQswCQYDVQQGEwJTQTEmMCQGA1UEChMdTWF4aW11bSBTcGVlZCBUZWNoIFN1cHBseSBMVEQxFjAUBgNVBAsTDVJpeWFkaCBCcmFuY2gxJjAkBgNVBAMTHVRTVC04ODY0MzExNDUtMzk5OTk5OTk5OTAwMDAzMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeKOCAgcwggIDMIGtBgNVHREEgaUwgaKkgZ8wgZwxOzA5BgNVBAQMMjEtVFNUfDItVFNUfDMtZWQyMmYxZDgtZTZhMi0xMTE4LTliNTgtZDlhOGYxMWU0NDVmMR8wHQYKCZImiZPyLGQBAQwPMzk5OTk5OTk5OTAwMDAzMQ0wCwYDVQQMDAQxMTAwMREwDwYDVQQaDAhSUlJEMjkyOTEaMBgGA1UEDwwRU3VwcGx5IGFjdGl2aXRpZXMwHQYDVR0OBBYEFEX+YvmmtnYoDf9BGbKo7ocTKYK1MB8GA1UdIwQYMBaAFJvKqqLtmqwskIFzVvpP2PxT+9NnMHsGCCsGAQUFBwEBBG8wbTBrBggrBgEFBQcwAoZfaHR0cDovL2FpYTQuemF0Y2EuZ292LnNhL0NlcnRFbnJvbGwvUFJaRUludm9pY2VTQ0E0LmV4dGdhenQuZ292LmxvY2FsX1BSWkVJTlZPSUNFU0NBNC1DQSgxKS5jcnQwDgYDVR0PAQH/BAQDAgeAMDwGCSsGAQQBgjcVBwQvMC0GJSsGAQQBgjcVCIGGqB2E0PsShu2dJIfO+xnTwFVmh/qlZYXZhD4CAWQCARIwHQYDVR0lBBYwFAYIKwYBBQUHAwMGCCsGAQUFBwMCMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwMwCgYIKwYBBQUHAwIwCgYIKoZIzj0EAwIDSAAwRQIhALE/ichmnWXCUKUbca3yci8oqwaLvFdHVjQrveI9uqAbAiA9hC4M8jgMBADPSzmd2uiPJA6gKR3LE03U75eqbC/rXA==";
+                privateKey = "MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA==";
+            }
+
             SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
 
             // Validate Signed Invoice *** just test ***
+            // In Non Production Environment,
+            // Look like Validation only work for Invoice signed using Certificate and Privatekey from Zatca eInvoice SDK
+            
             EInvoiceValidator eInvoiceValidator = new();
             var validationResult = eInvoiceValidator.ValidateEInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih);
+
             if (validationResult != null)
             {
                 foreach (var e in validationResult.ValidationSteps)
                 {
                     Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
+
                     if (!e.IsValid)
                     {
                         foreach (var x in e.ErrorMessages)
@@ -76,22 +84,28 @@ namespace ZatcaWithSDK
                     }
                     else
                     {
+
                         foreach (var x in e.WarningMessages)
                         {
                             Console.WriteLine(x);
                         }
                     }
-
                 }
-                Console.WriteLine($"Overall Signed Invoice Validation : {validationResult.IsValid}!");
+                Console.WriteLine($"\nOverall Signed Invoice Validation : {validationResult.IsValid}!");
+
+                if (validationResult.IsValid)
+                {
+                    return new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
+                }
             }
 
-            return new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
+            // SignedInvoice is not valid
+            return null;
         }
 
         public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string invoiceTypeCodename, string invoiceTypeCodeValue, int icv, string pih, string instructionNote)
         {
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+            XmlNamespaceManager nsmgr = new(doc.NameTable);
             nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
             nsmgr.AddNamespace("cac", "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2");
 

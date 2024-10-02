@@ -4,7 +4,7 @@ namespace ZatcaWithSDK
 {
     public static class AppConfig
     {
-        
+
         // Select EnvironmentType
         public static EnvironmentType EnvironmentType = EnvironmentType.NonProduction;
 

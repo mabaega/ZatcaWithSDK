@@ -1,64 +1,32 @@
 ﻿// This code demonstrates how to use the Zatca.eInvoice.SDK Library.
 // Please make sure we copy ikvm folder from Test folder in Zatca eInvoice SDK to \bin\Debug\net8.0
 
-using System.Xml;
 using Newtonsoft.Json;
-using static ZatcaWithSDK.Models;
+using System.Xml;
 using ZatcaWithSDK;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
+using static ZatcaWithSDK.Models;
 
 class Program
 {
     private static CertificateInfo certificateInfo;
 
-    static async Task Main(string[] args)
+    static async Task Main()
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        //await Class1.Test();
-        
-        //return;
-
-
-        // Handle Schematrons error on validation method
-
-        //string sourceDir = Helpers.GetAbsolutePath(@"../../../ikvm");
-        //string destDir = AppDomain.CurrentDomain.BaseDirectory;
-        //Helpers.CopyDirectory(sourceDir, destDir);
-        //Console.WriteLine("Copy operation completed.");
-
-        using var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder
-                .AddFilter("Microsoft", LogLevel.Warning) 
-                .AddFilter("System", LogLevel.Warning) 
-                .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
-                .AddConsole(options =>
-                {
-                    options.FormatterName = "custom";
-                })
-                .AddConsoleFormatter<CustomConsoleFormatter, SimpleConsoleFormatterOptions>();
-        });
-
-        // Create a logger for the Program class
-        ILogger logger = loggerFactory.CreateLogger<Program>();
-
         // Log some information
-        logger.LogInformation("\nStarting the console app...");
-
-        // Create an instance of ZatcaService, passing the logger
-        var zatcaService = new ZatcaService(new HttpClient(), logger);
+        Console.WriteLine("\nStarting the console app...");
 
         try
         {
             // Onboarding
-            logger.LogInformation("\nStarting Onboarding process...");
-            certificateInfo = await zatcaService.DeviceOnboarding();
+            Console.WriteLine("\nStarting Onboarding process...");
+            var zatcaService = new OnboardingStep();
+            certificateInfo = await OnboardingStep.DeviceOnboarding();
             Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
-            logger.LogInformation("\nOnboarding process completed successfully.\n");
+            Console.WriteLine("\nOnboarding process completed successfully.\n");
 
-            logger.LogInformation("\nStarting Test Approval...\n");
+            Console.WriteLine("\nStarting Test Approval...\n");
 
             // Load CertificateInfo from JSON file
             certificateInfo = Helpers.DeserializeFromFile<CertificateInfo>(Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
@@ -69,72 +37,72 @@ class Program
                 document.Load(Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath));
 
                 // Process Standard Invoice, Credit Note, and Debit Note
-                await ProcessStandardDocuments(document, logger);
+                await ProcessStandardDocuments(document);
 
                 // Process Simplified Invoice, Credit Note, and Debit Note
-                await ProcessSimplifiedDocuments(document, logger);
+                await ProcessSimplifiedDocuments(document);
 
-                logger.LogInformation("\n\nALL DONE!\n\n");
+                Console.WriteLine("\n\nALL DONE!\n\n");
             }
             else
             {
-                logger.LogError("TEST FAILED!");
+                Console.WriteLine("TEST FAILED!");
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred:");
+            Console.WriteLine(ex.Message.ToString(), "An error occurred:");
         }
     }
 
-    private static async Task ProcessStandardDocuments(XmlDocument document, ILogger logger)
+    private static async Task ProcessStandardDocuments(XmlDocument document)
     {
-        logger.LogInformation("\n1. Get Standard Invoice Approval\n");
+        Console.WriteLine("\n1. Get Standard Invoice Approval\n");
 
         // Standard Invoice
         var newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", "0100000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
+        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
         var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
-        LogServerResult(serverResult, "Clearance Standard Credit Note", logger);
+        LogServerResult(serverResult, "Clearance Standard Credit Note");
 
         // Standard Credit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001", "0100000", "383", certificateInfo.ICV + 1, certificateInfo.PIH, "Standard CreditNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
-        LogServerResult(serverResult,  "Clearance Standard Credit Note", logger);
+        LogServerResult(serverResult, "Clearance Standard Credit Note");
 
         // Standard Debit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001", "0100000", "381", certificateInfo.ICV + 1, certificateInfo.PIH, "Standard DebitNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
-        LogServerResult(serverResult, "Clearance Standard Debit Note", logger);
+        LogServerResult(serverResult, "Clearance Standard Debit Note");
     }
 
-    private static async Task ProcessSimplifiedDocuments(XmlDocument document, ILogger logger)
+    private static async Task ProcessSimplifiedDocuments(XmlDocument document)
     {
-        logger.LogInformation("\n2. Get Simplified Invoice Approval\n");
+        Console.WriteLine("\n2. Get Simplified Invoice Approval\n");
 
         // Simplified Invoice
 
         var newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", "0200000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
+        var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
         var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
-        LogServerResult(serverResult, "Reporting Simplified Invoice", logger);
+        LogServerResult(serverResult, "Reporting Simplified Invoice");
 
         // Simplified Credit Note
         newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001", "0200000", "383", certificateInfo.ICV + 1, certificateInfo.PIH, "simplified CreditNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
-        LogServerResult(serverResult, "Reporting Simplified Credit Note", logger);
+        LogServerResult(serverResult, "Reporting Simplified Credit Note");
 
         // Simplified Debit Note
-        newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001", "0200000", "381", certificateInfo.ICV +1, certificateInfo.PIH, "simplified DebitNote");
-        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo.PCSIDBinaryToken, certificateInfo.PrivateKey, certificateInfo.PIH);
+        newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001", "0200000", "381", certificateInfo.ICV + 1, certificateInfo.PIH, "simplified DebitNote");
+        requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
         serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
-        LogServerResult(serverResult, "Reporting Simplified Debit Note", logger);
+        LogServerResult(serverResult, "Reporting Simplified Debit Note");
     }
 
-    private static void LogServerResult(ServerResult serverResult, string description, ILogger logger)
+    private static void LogServerResult(ServerResult serverResult, string description)
     {
         var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
 
@@ -150,19 +118,19 @@ class Program
                 certificateInfo.ICV += 1;
                 certificateInfo.PIH = serverResult.InvoiceHash;
                 serverResult.InvoiceHash = null;
-                logger.LogInformation($"{description}\n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
-                
+                Console.WriteLine($"{description}\n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
+
                 //Update Crtificate Info
                 Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
             }
             else
             {
-                logger.LogInformation($"{description} was Rejected! \n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
+                Console.WriteLine($"{description} was Rejected! \n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
             }
         }
         else
         {
-            logger.LogError($"\n\nError processing {description}\n\n");
+            Console.WriteLine($"\n\nError processing {description}\n\n");
         }
     }
 

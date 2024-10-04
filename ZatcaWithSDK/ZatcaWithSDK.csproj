@@ -21,9 +21,6 @@
     <Content Include="Data\InvSample\TemplateInvoice.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\MyCertificate\CertificateInfo.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   
@@ -31,6 +28,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
+  
   <ItemGroup>
     <Reference Include="Zatca.EInvoice.SDK">
       <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.5\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net8.0\Zatca.EInvoice.SDK.dll</HintPath>

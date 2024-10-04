@@ -6,7 +6,7 @@ namespace ZatcaWithSDK
     {
 
         // Select EnvironmentType
-        public static EnvironmentType EnvironmentType = EnvironmentType.Simulation;
+        public static EnvironmentType EnvironmentType = EnvironmentType.NonProduction;
 
         // Get OTP from fatoora Portal for Simulation Environment
         public static string OTP = "123456";

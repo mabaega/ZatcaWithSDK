@@ -19,12 +19,15 @@ class Program
 
         try
         {
-            // Onboarding
-            Console.WriteLine("\nStarting Onboarding process...");
-            var zatcaService = new OnboardingStep();
-            certificateInfo = await OnboardingStep.DeviceOnboarding();
-            Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
-            Console.WriteLine("\nOnboarding process completed successfully.\n");
+            //Onboarding
+            //if (!System.IO.File.Exists(Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath)))
+            //{
+                Console.WriteLine("\nStarting Onboarding process...");
+                var zatcaService = new OnboardingStep();
+                certificateInfo = await OnboardingStep.DeviceOnboarding();
+                Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
+                Console.WriteLine("\nOnboarding process completed successfully.\n");
+            //}
 
             Console.WriteLine("\nStarting Test Approval...\n");
 
@@ -53,6 +56,8 @@ class Program
         {
             Console.WriteLine(ex.Message.ToString(), "An error occurred:");
         }
+
+        Console.ReadLine();
     }
 
     private static async Task ProcessStandardDocuments(XmlDocument document)

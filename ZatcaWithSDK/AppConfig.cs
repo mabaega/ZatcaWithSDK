@@ -6,7 +6,7 @@ namespace ZatcaWithSDK
     {
 
         // Select EnvironmentType
-        public static EnvironmentType EnvironmentType = EnvironmentType.NonProduction;
+        public static EnvironmentType EnvironmentType = EnvironmentType.Simulation;
 
         // Get OTP from fatoora Portal for Simulation Environment
         public static string OTP = "123456";
@@ -29,9 +29,9 @@ namespace ZatcaWithSDK
 
         // Modify this Invoice Template @ <cac:AccountingSupplierParty>,
         // when we use real Vat Number / Simulation Environment
-        public static string TemplateInvoicePath { get; set; } = @"../../../Data/InvSample/TemplateInvoice.xml";
+        public static string TemplateInvoicePath { get; set; } = @"Data/InvSample/TemplateInvoice.xml";
 
         // This file will contain EnvironmentType, Api path and all Certificate Information
-        public static string CertificateInfoPath { get; set; } = @"../../../Data/MyCertificate/CertificateInfo.json";
+        public static string CertificateInfoPath { get; set; } = @"Data/MyCertificate/CertificateInfo.json";
     }
 }

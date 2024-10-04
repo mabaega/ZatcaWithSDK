@@ -130,7 +130,7 @@ namespace ZatcaWithSDK
 
                 var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
 
-                var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certInfo, pih, true);
+                var requestResult = Helpers.GenerateRequestApi(newDoc, certInfo, pih, true);
 
                 var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
 

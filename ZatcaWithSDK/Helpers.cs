@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 using Zatca.EInvoice.SDK;
+using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK.Contracts.Models;
 using static ZatcaWithSDK.Models;
 
@@ -57,8 +60,10 @@ namespace ZatcaWithSDK
             }
         }
 
-        public static RequestResult GenerateSignedRequestApi(XmlDocument document, CertificateInfo certInfo, string pih, bool isForCompliance = false)
+        public static RequestResult GenerateRequestApi(XmlDocument document, CertificateInfo certInfo, string pih, bool isForCompliance = false)
         {
+            RequestResult requestResult = null;
+
             string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(isForCompliance ? certInfo.CCSIDBinaryToken : certInfo.PCSIDBinaryToken));
             string privateKey = certInfo.PrivateKey;
 
@@ -69,14 +74,32 @@ namespace ZatcaWithSDK
                 privateKey = "MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA==";
             }
 
-            SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
+            if (IsSimplifiedInvoice(document)) 
+            {
+                SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
+                
+                if (IsValidInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih))
+                {
+                    requestResult = new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
+                }
+            }
+            else
+            {
+                if (IsValidInvoice(document, x509CertificateContent, pih))
+                {
+                    HashResult hashResult = new EInvoiceHashGenerator().GenerateEInvoiceHashing(document);
 
-            // Validate Signed Invoice *** just test ***
-            // In Non Production Environment,
-            // Look like Validation only work for Invoice signed using Certificate and Privatekey from Zatca eInvoice SDK
-            
-            EInvoiceValidator eInvoiceValidator = new();
-            var validationResult = eInvoiceValidator.ValidateEInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih);
+                    requestResult = new RequestGenerator().GenerateRequest(document);
+                    requestResult.InvoiceRequest.InvoiceHash = hashResult.Hash;
+                }
+            }
+
+            return requestResult;
+        }
+
+        internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)
+        {
+            var validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
 
             if (validationResult != null)
             {
@@ -100,16 +123,32 @@ namespace ZatcaWithSDK
                         }
                     }
                 }
+
                 Console.WriteLine($"\nOverall Signed Invoice Validation : {validationResult.IsValid}!");
 
-                if (validationResult.IsValid)
-                {
-                    return new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
-                }
+                return validationResult.IsValid;
             }
 
-            // SignedInvoice is not valid
-            return null;
+            return false;
+
+        }
+
+        internal static bool IsSimplifiedInvoice(XmlDocument document)
+        {
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(document.NameTable);
+            nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
+
+            XmlNode invoiceTypeCode = document.SelectSingleNode("//cbc:InvoiceTypeCode", nsmgr);
+
+            if (invoiceTypeCode != null)
+            {
+                XmlAttribute nameAttribute = invoiceTypeCode.Attributes["name"];
+                if (nameAttribute != null && nameAttribute.Value.StartsWith("02"))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static XmlDocument CreateModifiedInvoiceXml(XmlDocument doc, string id, string invoiceTypeCodename, string invoiceTypeCodeValue, int icv, string pih, string instructionNote)

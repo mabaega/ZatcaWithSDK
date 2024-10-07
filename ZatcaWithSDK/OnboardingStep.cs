@@ -45,12 +45,12 @@ namespace ZatcaWithSDK
                 throw;
             }
         }
-
         private static bool Step1_GenerateCSR(CertificateInfo certInfo)
         {
             Console.WriteLine("\nStep 1: Generating CSR and PrivateKey");
+
             var csrGenerator = new CsrGenerator();
-            CsrResult csrResult = csrGenerator.GenerateCsr(AppConfig.CsrInfoProperties, AppConfig.EnvironmentType, false);
+            CsrResult csrResult = csrGenerator.GenerateCsr(AppConfig.csrGenerationDto, AppConfig.EnvironmentType, false);
 
             if (!csrResult.IsValid)
             {
@@ -60,7 +60,9 @@ namespace ZatcaWithSDK
 
             certInfo.GeneratedCsr = csrResult.Csr;
             certInfo.PrivateKey = csrResult.PrivateKey;
+
             Console.WriteLine("CSR and PrivateKey generated successfully");
+            
             return true;
         }
 
@@ -100,63 +102,73 @@ namespace ZatcaWithSDK
 
         private static async Task<bool> Step3_SendSampleDocuments(CertificateInfo certInfo)
         {
-            Console.WriteLine("\nStep 3: Sending Sample Documents\n");
-
-            XmlDocument baseDocument = new() { PreserveWhitespace = true };
-            string templatePath = Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath);
-
-            baseDocument.Load(templatePath);
-
-            var documentTypes = new[] {
-        ("STDSI", "388", "Standard Invoice"),
-        ("STDCN", "383", "Standard CreditNote"),
-        ("STDDN", "381", "Standard DebitNote"),
-        ("SIMSI", "388", "Simplified Invoice"),
-        ("SIMCN", "383", "Simplified CreditNote"),
-        ("SIMDN", "381", "Simplified DebitNote")
-    };
-
-            int icv = 0;
-            string pih = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
-
-            for (int i = 0; i < documentTypes.Length; i++)
+            try
             {
-                var (prefix, typeCode, description) = documentTypes[i];
-                icv += 1;
 
-                var isSimplified = prefix.StartsWith("SIM");
+                Console.WriteLine("\nStep 3: Sending Sample Documents\n");
 
-                Console.WriteLine($"Processing {description}...");
+                XmlDocument baseDocument = new() { PreserveWhitespace = true };
+                string templatePath = Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath);
 
-                var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
+                baseDocument.Load(templatePath);
 
-                var requestResult = Helpers.GenerateRequestApi(newDoc, certInfo, pih, true);
+                var documentTypes = new[] {
+                                            ("STDSI", "388", "Standard Invoice"),
+                                            ("STDCN", "383", "Standard CreditNote"),
+                                            ("STDDN", "381", "Standard DebitNote"),
+                                            ("SIMSI", "388", "Simplified Invoice"),
+                                            ("SIMCN", "383", "Simplified CreditNote"),
+                                            ("SIMDN", "381", "Simplified DebitNote")
+                                        };
 
-                var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
+                int icv = 0;
+                string pih = "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==";
 
-                if (serverResult == null)
+                for (int i = 0; i < documentTypes.Length; i++)
                 {
-                    Console.WriteLine($"Failed to process {description}: serverResult is null.");
-                    return false;
+                    var (prefix, typeCode, description) = documentTypes[i];
+                    icv += 1;
+
+                    var isSimplified = prefix.StartsWith("SIM");
+
+                    Console.WriteLine($"Processing {description}...");
+
+                    var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
+
+                    var requestResult = Helpers.GenerateRequestApi(newDoc, certInfo, pih, true);
+
+                    var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
+
+                    if (serverResult == null)
+                    {
+                        Console.WriteLine($"Failed to process {description}: serverResult is null.");
+                        return false;
+                    }
+
+                    var status = isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus;
+
+                    if (status.Contains("REPORTED") || status.Contains("CLEARED"))
+                    {
+                        pih = requestResult.InvoiceRequest.InvoiceHash;
+                        Console.WriteLine($"{description} processed successfully\n\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to process {description}: status is {status}\n\n");
+                        return false;
+                    }
+
+                    await Task.Delay(200);
                 }
 
-                var status = isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus;
-
-                if (status.Contains("REPORTED") || status.Contains("CLEARED"))
-                {
-                    pih = requestResult.InvoiceRequest.InvoiceHash;
-                    Console.WriteLine($"\n{description} processed successfully\n\n");
-                }
-                else
-                {
-                    Console.WriteLine($"Failed to process {description}: status is {status}");
-                    return false;
-                }
-
-                await Task.Delay(200);
+                return true;
             }
+            catch (Exception ex)
+            {
 
-            return true;
+                Console.WriteLine($"{ex.Message} \n\n");
+                return false ;
+            }
         }
 
         private static async Task<bool> Step4_GetPCSID(CertificateInfo certInfo)

@@ -70,19 +70,19 @@ namespace NetFx48
 
             // Standard Invoice
             var newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", "0100000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-            var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            var requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
             var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
             LogServerResult(serverResult, "Clearance Standard Credit Note");
 
             // Standard Credit Note
             newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDCN-001", "0100000", "383", certificateInfo.ICV + 1, certificateInfo.PIH, "Standard CreditNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
             serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
             LogServerResult(serverResult, "Clearance Standard Credit Note");
 
             // Standard Debit Note
             newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDDN-001", "0100000", "381", certificateInfo.ICV + 1, certificateInfo.PIH, "Standard DebitNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
             serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
             LogServerResult(serverResult, "Clearance Standard Debit Note");
         }
@@ -94,19 +94,19 @@ namespace NetFx48
             // Simplified Invoice
 
             var newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", "0200000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-            var requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            var requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
             var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
             LogServerResult(serverResult, "Reporting Simplified Invoice");
 
             // Simplified Credit Note
             newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMCN-001", "0200000", "383", certificateInfo.ICV + 1, certificateInfo.PIH, "simplified CreditNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
             serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
             LogServerResult(serverResult, "Reporting Simplified Credit Note");
 
             // Simplified Debit Note
             newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMDN-001", "0200000", "381", certificateInfo.ICV + 1, certificateInfo.PIH, "simplified DebitNote");
-            requestResult = Helpers.GenerateSignedRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
             serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
             LogServerResult(serverResult, "Reporting Simplified Debit Note");
         }

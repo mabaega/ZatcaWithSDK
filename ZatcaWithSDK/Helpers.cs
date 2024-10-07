@@ -26,13 +26,16 @@ namespace ZatcaWithSDK
         public static void SerializeToFile<T>(T data, string filePath)
         {
             var directory = Path.GetDirectoryName(filePath);
+            
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
             var json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
+
             File.WriteAllText(filePath, json);
+            
             Console.WriteLine($"\nOnboarding Info Data has been serialized to the file.\n");
         }
 

@@ -6,35 +6,40 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(ProjectDir)ikvm&quot; &quot;$(TargetDir)ikvm\&quot; /E /I /Y" />
+    <Exec Command="xcopy &quot;$(ProjectDir)Data&quot; &quot;$(TargetDir)Data\&quot; /E /I /Y" />
+  </Target>
+
+  <Target Name="PostPublish" AfterTargets="Publish">
+    <Exec Command="xcopy &quot;$(ProjectDir)ikvm&quot; &quot;$(PublishDir)ikvm\&quot; /E /I /Y" />
+    <Exec Command="xcopy &quot;$(ProjectDir)Data&quot; &quot;$(PublishDir)Data\&quot; /E /I /Y" />
+  </Target>
+
   <ItemGroup>
-    <Compile Remove="bin\Data\**" />
     <Compile Remove="Data\**" />
-    <EmbeddedResource Remove="bin\Data\**" />
+    <Compile Remove="ikvm\**" />
+    <Compile Remove="SDK3.3.5\**" />
     <EmbeddedResource Remove="Data\**" />
-    <None Remove="bin\Data\**" />
+    <EmbeddedResource Remove="ikvm\**" />
+    <EmbeddedResource Remove="SDK3.3.5\**" />
     <None Remove="Data\**" />
+    <None Remove="ikvm\**" />
+    <None Remove="SDK3.3.5\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Data\InvSample\TemplateInvoice.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-
-  
-  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>SDK3.3.5\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Zatca.EInvoice.SDK">
-      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.5\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net8.0\Zatca.EInvoice.SDK.dll</HintPath>
+      <HintPath>SDK3.3.5\Zatca.EInvoice.SDK.dll</HintPath>
     </Reference>
     <Reference Include="Zatca.EInvoice.SDK.Contracts">
-      <HintPath>..\..\..\..\..\..\zatca-einvoicing-sdk-238-R3.3.5\Lib\Dot-Net8\DLL\Zatca.EInvoice.SDK\net8.0\Zatca.EInvoice.SDK.Contracts.dll</HintPath>
+      <HintPath>SDK3.3.5\Zatca.EInvoice.SDK.Contracts.dll</HintPath>
     </Reference>
   </ItemGroup>
 

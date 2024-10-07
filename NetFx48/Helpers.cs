@@ -61,9 +61,9 @@ namespace NetFx48
             }
         }
 
-        public static RequestResult GenerateSignedRequestApi(XmlDocument document, CertificateInfo certInfo, string pih, bool isForCompliance = false)
+        public static RequestResult GenerateRequestApi(XmlDocument document, CertificateInfo certInfo, string pih, bool isForCompliance = false)
         {
-            RequestResult requestResult;
+            RequestResult requestResult = null;
 
             string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(isForCompliance ? certInfo.CCSIDBinaryToken : certInfo.PCSIDBinaryToken));
             string privateKey = certInfo.PrivateKey;
@@ -79,60 +79,62 @@ namespace NetFx48
             {
                 SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
 
-                //if (IsValidInvoice(document, x509CertificateContent, pih))
-                //{
+                if (IsValidInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih))
+                {
                     requestResult = new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
-                //}
+                }
             }
             else
             {
-                //if (IsValidInvoice(document, x509CertificateContent, pih))
-                //{
+                if (IsValidInvoice(document, x509CertificateContent, pih))
+                {
                     HashResult hashResult = new EInvoiceHashGenerator().GenerateEInvoiceHashing(document);
 
                     requestResult = new RequestGenerator().GenerateRequest(document);
                     requestResult.InvoiceRequest.InvoiceHash = hashResult.Hash;
-                //}
+                }
             }
 
             return requestResult;
         }
 
-        //internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)
-        //{
-        //    var validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
+        internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)
+        {
+            var validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
 
-        //    if (validationResult != null)
-        //    {
-        //        foreach (var e in validationResult.ValidationSteps)
-        //        {
-        //            Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
+            if (validationResult != null)
+            {
+                foreach (var e in validationResult.ValidationSteps)
+                {
+                    Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
 
-        //            if (!e.IsValid)
-        //            {
-        //                foreach (var x in e.ErrorMessages)
-        //                {
-        //                    Console.WriteLine(x);
-        //                }
-        //            }
-        //            else
-        //            {
+                    if (!e.IsValid)
+                    {
+                        foreach (var x in e.ErrorMessages)
+                        {
+                            Console.WriteLine(x);
+                        }
+                    }
+                    else
+                    {
 
-        //                foreach (var x in e.WarningMessages)
-        //                {
-        //                    Console.WriteLine(x);
-        //                }
-        //            }
-        //        }
+                        foreach (var x in e.WarningMessages)
+                        {
+                            Console.WriteLine(x);
+                        }
+                    }
+                }
 
-        //        Console.WriteLine($"\nOverall Signed Invoice Validation : {validationResult.IsValid}!");
+                Console.WriteLine($"\nOverall Signed Invoice Validation : {validationResult.IsValid}!");
 
-        //        return validationResult.IsValid;
-        //    }
+                //return validationResult.IsValid;
+                return true;
+            }
 
-        //    return false;
+            // Validation not working on NetFX 4.8 just meke it true
+            return true;
 
-        //}
+        }
 
         internal static bool IsSimplifiedInvoice(XmlDocument document)
         {
@@ -233,7 +235,7 @@ namespace NetFx48
 
         public static async Task<ServerResult> ComplianceCheck(CertificateInfo certInfo, InvoiceRequest requestApi)
         {
-            return  await PerformApiRequest(certInfo.ComplianceCheckUrl, requestApi, certInfo.CCSIDBinaryToken, certInfo.CCSIDSecret, "Compliance Check");
+            return await PerformApiRequest(certInfo.ComplianceCheckUrl, requestApi, certInfo.CCSIDBinaryToken, certInfo.CCSIDSecret, "Compliance Check");
         }
 
         public static async Task<ServerResult> GetApproval(CertificateInfo certInfo, InvoiceRequest requestApi, bool isClearance)

@@ -22,12 +22,15 @@
   <ItemGroup>
     <Compile Remove="Data\**" />
     <Compile Remove="ikvm\**" />
+    <Compile Remove="SDK3.3.5X\**" />
     <Compile Remove="SDK3.3.5\**" />
     <EmbeddedResource Remove="Data\**" />
     <EmbeddedResource Remove="ikvm\**" />
+    <EmbeddedResource Remove="SDK3.3.5X\**" />
     <EmbeddedResource Remove="SDK3.3.5\**" />
     <None Remove="Data\**" />
     <None Remove="ikvm\**" />
+    <None Remove="SDK3.3.5X\**" />
     <None Remove="SDK3.3.5\**" />
   </ItemGroup>
 

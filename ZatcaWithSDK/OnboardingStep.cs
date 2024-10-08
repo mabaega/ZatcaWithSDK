@@ -145,6 +145,12 @@ namespace ZatcaWithSDK
                         return false;
                     }
 
+                    // log Compliance Check
+
+                    var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+                    Console.WriteLine($"\n{description}\n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
+
+
                     var status = isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus;
 
                     if (status.Contains("REPORTED") || status.Contains("CLEARED"))

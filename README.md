@@ -23,7 +23,8 @@ All Done In Sandbox Protal (Non Production Environtment) and Should not any Prob
 
 It just Simple code, that show how working with Zatca SDK.  Ofcourse, we can use another feature that provided in Zatca SDK
 
-Please make sure we copy ikvm folder from Test folder in Zatca eInvoice SDK to \bin\Debug\net8.0 if we want to use Validation Method from Zatca.eInvoice.SDK.
+For NET Framework 4.8, this sample code using .Net Zatca eInvoice SDK library (*zatca-einvoicing-sdk-238-R3.3.3*) that work good for validation.
+we can change SDK Zatca eInvoice SDK library version to latest version, but we need commented Validation code. eInvoiceValidator not work on new SDK version.
 
 **All work well in my test on Windows OS, please let me know, if anyone has problem trying this sample code.**
 

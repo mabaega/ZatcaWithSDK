@@ -272,8 +272,6 @@ namespace ZatcaWithSDK
                 serverResult.RequestUrl = requestUri;
                 serverResult.InvoiceHash = requestApi.InvoiceHash;
 
-                if (!string.IsNullOrEmpty(serverResult.ClearedInvoice)){ Console.WriteLine(serverResult.ClearedInvoice); }
-
                 return serverResult;
             }
             catch (Exception ex)

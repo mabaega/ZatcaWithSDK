@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 using Zatca.EInvoice.SDK;
-using Zatca.EInvoice.SDK.Contracts;
 using Zatca.EInvoice.SDK.Contracts.Models;
 using static ZatcaWithSDK.Models;
 
@@ -25,42 +23,75 @@ namespace ZatcaWithSDK
 
         public static void SerializeToFile<T>(T data, string filePath)
         {
-            var directory = Path.GetDirectoryName(filePath);
-            
+            string directory = Path.GetDirectoryName(filePath);
+
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            var json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
+            string json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
 
             File.WriteAllText(filePath, json);
-            
+
             Console.WriteLine($"\nOnboarding Info Data has been serialized to the file.\n");
         }
 
         public static T DeserializeFromFile<T>(string filePath)
         {
-            var json = File.ReadAllText(filePath);
+            string json = File.ReadAllText(filePath);
 
 
             Console.WriteLine($"\nOnboarding Info Data has been loaded from file.\n");
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static void CopyDirectory(string sourceDir, string destinationDir)
+        //public static void CopyDirectory(string sourceDir, string destinationDir)
+        //{
+        //    Directory.CreateDirectory(destinationDir);
+        //    foreach (string file in Directory.GetFiles(sourceDir))
+        //    {
+        //        string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
+        //        File.Copy(file, destFile, true);
+        //    }
+        //    foreach (string subDir in Directory.GetDirectories(sourceDir))
+        //    {
+        //        string destSubDir = Path.Combine(destinationDir, Path.GetFileName(subDir));
+        //        CopyDirectory(subDir, destSubDir);
+        //    }
+        //}
+
+        public static bool ExtractSchematrons()
         {
-            Directory.CreateDirectory(destinationDir);
-            foreach (string file in Directory.GetFiles(sourceDir))
+            Assembly assembly = Assembly.Load("Zatca.EInvoice.SDK");
+            string outputFolder = Path.Combine("Data", "Rules", "schematrons");
+            Directory.CreateDirectory(outputFolder);
+
+            if (assembly != null)
             {
-                string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
-                File.Copy(file, destFile, true);
+                string[] resourceNames = assembly.GetManifestResourceNames();
+                foreach (string resourceName in resourceNames)
+                {
+                    if (resourceName.Contains("Schematrons"))
+                    {
+                        string[] resourceNameParts = resourceName.Split('.');
+                        string fileName = $"{resourceNameParts[^2]}.{resourceNameParts[^1]}";
+                        string outputFile = Path.Combine(outputFolder, fileName);
+
+                        using Stream stream = assembly.GetManifestResourceStream(resourceName);
+                        if (stream != null)
+                        {
+                            using FileStream fileStream = new(outputFile, FileMode.Create, FileAccess.Write);
+                            stream.CopyTo(fileStream);
+                            Console.WriteLine($"Resource {resourceName} berhasil diekstrak ke {outputFile}");
+                        }
+                    }
+
+                    return true;
+                }
             }
-            foreach (string subDir in Directory.GetDirectories(sourceDir))
-            {
-                string destSubDir = Path.Combine(destinationDir, Path.GetFileName(subDir));
-                CopyDirectory(subDir, destSubDir);
-            }
+
+            return false;
         }
 
         public static RequestResult GenerateRequestApi(XmlDocument document, CertificateInfo certInfo, string pih, bool isForCompliance = false)
@@ -77,10 +108,10 @@ namespace ZatcaWithSDK
                 privateKey = "MHQCAQEEIL14JV+5nr/sE8Sppaf2IySovrhVBtt8+yz+g4NRKyz8oAcGBSuBBAAKoUQDQgAEoWCKa0Sa9FIErTOv0uAkC1VIKXxU9nPpx2vlf4yhMejy8c02XJblDq7tPydo8mq0ahOMmNo8gwni7Xt1KT9UeA==";
             }
 
-            if (IsSimplifiedInvoice(document)) 
+            if (IsSimplifiedInvoice(document))
             {
                 SignResult signedInvoiceResult = new EInvoiceSigner().SignDocument(document, x509CertificateContent, privateKey);
-                
+
                 if (IsValidInvoice(signedInvoiceResult.SignedEInvoice, x509CertificateContent, pih))
                 {
                     requestResult = new RequestGenerator().GenerateRequest(signedInvoiceResult.SignedEInvoice);
@@ -100,29 +131,50 @@ namespace ZatcaWithSDK
             return requestResult;
         }
 
+
+        //public XmlDocument LoadXmlDocument(XmlDocument document)
+        //{
+        //    XmlReaderSettings standardXsdReaderSettings = GetStandardXsdReaderSettings();
+        //    XmlDocument document1 = new XmlDocument { PreserveWhitespace = true };
+
+        //    using (XmlReader reader = XmlReader.Create(new MemoryStream(Encoding.UTF8.GetBytes(document.OuterXml)), standardXsdReaderSettings))
+        //    {
+        //        document1.Load(reader);
+        //    }
+        //}
+
+        //public static XmlReaderSettings GetStandardXsdReaderSettings()
+        //{
+        //    XmlReaderSettings settings1 = new XmlReaderSettings
+        //    {
+        //        DtdProcessing = DtdProcessing.Parse,
+        //        XmlResolver = new CustomUrlResolver()
+        //    };
+        //    return settings1;
+        //}
+
         internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)
         {
             // always return true for now, EInvoiceValidator has problem in some computer
 
-            var validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
+            Zatca.EInvoice.SDK.Contracts.Models.ValidationResult validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
 
             if (validationResult != null)
             {
-                foreach (var e in validationResult.ValidationSteps)
+                foreach (ValidationStepResult e in validationResult.ValidationSteps)
                 {
                     Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
 
                     if (!e.IsValid)
                     {
-                        foreach (var x in e.ErrorMessages)
+                        foreach (string x in e.ErrorMessages)
                         {
                             Console.WriteLine(x);
                         }
                     }
                     else
                     {
-
-                        foreach (var x in e.WarningMessages)
+                        foreach (string x in e.WarningMessages)
                         {
                             Console.WriteLine(x);
                         }
@@ -135,14 +187,13 @@ namespace ZatcaWithSDK
                 return true;
             }
 
+
             return true;
             //return false;
-
         }
-
         internal static bool IsSimplifiedInvoice(XmlDocument document)
         {
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(document.NameTable);
+            XmlNamespaceManager nsmgr = new(document.NameTable);
             nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
 
             XmlNode invoiceTypeCode = document.SelectSingleNode("//cbc:InvoiceTypeCode", nsmgr);
@@ -165,6 +216,8 @@ namespace ZatcaWithSDK
             nsmgr.AddNamespace("cac", "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2");
 
             XmlDocument newDoc = (XmlDocument)doc.CloneNode(true);
+            newDoc.PreserveWhitespace = true;
+
 
             Guid newGuid = Guid.NewGuid();
             string guidString = newGuid.ToString();
@@ -244,7 +297,7 @@ namespace ZatcaWithSDK
 
         public static async Task<ServerResult> GetApproval(CertificateInfo certInfo, InvoiceRequest requestApi, bool isClearance)
         {
-            var requestUri = isClearance ? certInfo.ClearanceUrl : certInfo.ReportingUrl;
+            string requestUri = isClearance ? certInfo.ClearanceUrl : certInfo.ReportingUrl;
             return await PerformApiRequest(requestUri, requestApi, certInfo.PCSIDBinaryToken, certInfo.PCSIDSecret, isClearance ? "Clearance" : "Reporting", isClearance);
         }
 
@@ -264,12 +317,12 @@ namespace ZatcaWithSDK
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(Encoding.ASCII.GetBytes($"{token}:{secret}")));
 
-                var content = new StringContent(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
+                StringContent content = new(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync(requestUri, content);
+                HttpResponseMessage response = await _httpClient.PostAsync(requestUri, content);
 
-                var resultContent = await response.Content.ReadAsStringAsync();
-                var serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
+                string resultContent = await response.Content.ReadAsStringAsync();
+                ServerResult serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
 
                 serverResult.StatusCode = $"{(int)response.StatusCode}-{response.StatusCode}";
                 serverResult.RequestType = requestType;

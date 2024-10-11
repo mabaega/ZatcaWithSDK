@@ -18,10 +18,10 @@ namespace ZatcaWithSDK
         public static string CsrConfigPropertiesPath { get; set; } = @"Data/MyCertificate/csr-config.properties";
 
         // Load Csr.Config.Properties file and initialize CsrGenerationDto
-        public static CsrGenerationDto csrGenerationDto { get; } = LoadCsrGenerationDto();
+        public static CsrGenerationDto CsrGenerationDto { get; } = LoadCsrGenerationDto();
         private static CsrGenerationDto LoadCsrGenerationDto()
         {
-            var properties = LoadProperties(CsrConfigPropertiesPath);
+            Dictionary<string, string> properties = LoadProperties(CsrConfigPropertiesPath);
             return new CsrGenerationDto(
                 properties["csr.common.name"],
                 properties["csr.serial.number"],
@@ -36,12 +36,12 @@ namespace ZatcaWithSDK
         }
         private static Dictionary<string, string> LoadProperties(string filePath)
         {
-            var properties = new Dictionary<string, string>();
-            foreach (var line in System.IO.File.ReadAllLines(filePath))
+            Dictionary<string, string> properties = new();
+            foreach (string line in System.IO.File.ReadAllLines(filePath))
             {
                 if (!string.IsNullOrWhiteSpace(line) && line.Contains('='))
                 {
-                    var parts = line.Split('=', 2);
+                    string[] parts = line.Split('=', 2);
                     properties[parts[0].Trim()] = parts[1].Trim();
                 }
             }

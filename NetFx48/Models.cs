@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using Zatca.EInvoice.SDK;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using Zatca.EInvoice.SDK.Contracts.Models;
-using Newtonsoft.Json;
 
 namespace NetFx48
 {

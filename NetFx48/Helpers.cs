@@ -26,13 +26,13 @@ namespace NetFx48
 
         public static void SerializeToFile<T>(T data, string filePath)
         {
-            var directory = Path.GetDirectoryName(filePath);
+            string directory = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            var json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
+            string json = JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
             File.WriteAllText(filePath, json);
 
             Console.WriteLine($"\nOnboarding Info Data has been serialized to the file.\n");
@@ -40,7 +40,7 @@ namespace NetFx48
 
         public static T DeserializeFromFile<T>(string filePath)
         {
-            var json = File.ReadAllText(filePath);
+            string json = File.ReadAllText(filePath);
 
             Console.WriteLine($"\nOnboarding Info Data has been loaded...\n");
             return JsonConvert.DeserializeObject<T>(json);
@@ -100,17 +100,17 @@ namespace NetFx48
 
         internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)
         {
-            var validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
+            Zatca.EInvoice.SDK.Contracts.Models.ValidationResult validationResult = new EInvoiceValidator().ValidateEInvoice(document, x509CertificateContent, pih);
 
             if (validationResult != null)
             {
-                foreach (var e in validationResult.ValidationSteps)
+                foreach (ValidationStepResult e in validationResult.ValidationSteps)
                 {
                     Console.WriteLine(e.ValidationStepName + " : " + e.IsValid);
 
                     if (!e.IsValid)
                     {
-                        foreach (var x in e.ErrorMessages)
+                        foreach (string x in e.ErrorMessages)
                         {
                             Console.WriteLine(x);
                         }
@@ -118,7 +118,7 @@ namespace NetFx48
                     else
                     {
 
-                        foreach (var x in e.WarningMessages)
+                        foreach (string x in e.WarningMessages)
                         {
                             Console.WriteLine(x);
                         }
@@ -138,7 +138,7 @@ namespace NetFx48
 
         internal static bool IsSimplifiedInvoice(XmlDocument document)
         {
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(document.NameTable);
+            XmlNamespaceManager nsmgr = new(document.NameTable);
             nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
 
             XmlNode invoiceTypeCode = document.SelectSingleNode("//cbc:InvoiceTypeCode", nsmgr);
@@ -240,7 +240,7 @@ namespace NetFx48
 
         public static async Task<ServerResult> GetApproval(CertificateInfo certInfo, InvoiceRequest requestApi, bool isClearance)
         {
-            var requestUri = isClearance ? certInfo.ClearanceUrl : certInfo.ReportingUrl;
+            string requestUri = isClearance ? certInfo.ClearanceUrl : certInfo.ReportingUrl;
             return await PerformApiRequest(requestUri, requestApi, certInfo.PCSIDBinaryToken, certInfo.PCSIDSecret, isClearance ? "Clearance" : "Reporting", isClearance);
         }
 
@@ -259,12 +259,12 @@ namespace NetFx48
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(Encoding.ASCII.GetBytes($"{token}:{secret}")));
 
-                var content = new StringContent(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
+                StringContent content = new(JsonConvert.SerializeObject(requestApi), Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync(requestUri, content);
+                HttpResponseMessage response = await _httpClient.PostAsync(requestUri, content);
 
-                var resultContent = await response.Content.ReadAsStringAsync();
-                var serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
+                string resultContent = await response.Content.ReadAsStringAsync();
+                ServerResult serverResult = JsonConvert.DeserializeObject<ServerResult>(resultContent);
 
                 serverResult.StatusCode = $"{(int)response.StatusCode}-{response.StatusCode}";
                 serverResult.RequestType = requestType;

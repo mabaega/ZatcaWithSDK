@@ -27,7 +27,7 @@ namespace NetFx48
                 //if (!System.IO.File.Exists(Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath)))
                 //{
                 Console.WriteLine("\nStarting Onboarding process...");
-                var zatcaService = new OnboardingStep();
+                OnboardingStep zatcaService = new();
                 certificateInfo = await OnboardingStep.DeviceOnboarding();
                 Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
                 Console.WriteLine("\nOnboarding process completed successfully.\n");
@@ -69,9 +69,9 @@ namespace NetFx48
             Console.WriteLine("\n1. Get Standard Invoice Approval\n");
 
             // Standard Invoice
-            var newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", "0100000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-            var requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
-            var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
+            XmlDocument newDoc = Helpers.CreateModifiedInvoiceXml(document, "STDSI-001", "0100000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
+            Zatca.EInvoice.SDK.Contracts.Models.RequestResult requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            ServerResult serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, true);
             LogServerResult(serverResult, "Clearance Standard Credit Note");
 
             // Standard Credit Note
@@ -93,9 +93,9 @@ namespace NetFx48
 
             // Simplified Invoice
 
-            var newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", "0200000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
-            var requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
-            var serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
+            XmlDocument newDoc = Helpers.CreateModifiedInvoiceXml(document, "SIMSI-001", "0200000", "388", certificateInfo.ICV + 1, certificateInfo.PIH, "");
+            Zatca.EInvoice.SDK.Contracts.Models.RequestResult requestResult = Helpers.GenerateRequestApi(newDoc, certificateInfo, certificateInfo.PIH, false);
+            ServerResult serverResult = await Helpers.GetApproval(certificateInfo, requestResult.InvoiceRequest, false);
             LogServerResult(serverResult, "Reporting Simplified Invoice");
 
             // Simplified Credit Note
@@ -113,7 +113,7 @@ namespace NetFx48
 
         private static void LogServerResult(ServerResult serverResult, string description)
         {
-            var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+            JsonSerializerSettings settings = new() { NullValueHandling = NullValueHandling.Ignore };
 
             if (serverResult != null)
             {

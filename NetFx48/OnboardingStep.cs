@@ -17,7 +17,7 @@ namespace NetFx48
 
         public static async Task<CertificateInfo> DeviceOnboarding()
         {
-            var certInfo = new CertificateInfo();
+            CertificateInfo certInfo = new();
 
             try
             {
@@ -53,7 +53,7 @@ namespace NetFx48
         private static bool Step1_GenerateCSR(CertificateInfo certInfo)
         {
             Console.WriteLine("\nStep 1: Generating CSR and PrivateKey");
-            var csrGenerator = new CsrGenerator();
+            CsrGenerator csrGenerator = new();
             CsrResult csrResult = csrGenerator.GenerateCsr(AppConfig.csrGenerationDto, AppConfig.EnvironmentType, false);
 
             if (!csrResult.IsValid)
@@ -72,7 +72,7 @@ namespace NetFx48
         {
             Console.WriteLine("\nStep 2: Getting Compliance CSID");
 
-            var jsonContent = JsonConvert.SerializeObject(new { csr = certInfo.GeneratedCsr });
+            string jsonContent = JsonConvert.SerializeObject(new { csr = certInfo.GeneratedCsr });
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -80,8 +80,8 @@ namespace NetFx48
             _httpClient.DefaultRequestHeaders.Add("OTP", AppConfig.OTP);
             _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
 
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(certInfo.ComplianceCSIDUrl, content);
+            StringContent content = new(jsonContent, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await _httpClient.PostAsync(certInfo.ComplianceCSIDUrl, content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -91,8 +91,8 @@ namespace NetFx48
 
             response.EnsureSuccessStatusCode();
 
-            var resultContent = await response.Content.ReadAsStringAsync();
-            var zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
+            string resultContent = await response.Content.ReadAsStringAsync();
+            ZatcaResultDto zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
 
             certInfo.CCSIDBinaryToken = zatcaResult.BinarySecurityToken;
             certInfo.CCSIDComplianceRequestId = zatcaResult.RequestID;
@@ -111,7 +111,7 @@ namespace NetFx48
 
             baseDocument.Load(templatePath);
 
-            var documentTypes = new[] {
+            (string, string, string)[] documentTypes = new[] {
         ("STDSI", "388", "Standard Invoice"),
         ("STDCN", "383", "Standard CreditNote"),
         ("STDDN", "381", "Standard DebitNote"),
@@ -125,18 +125,18 @@ namespace NetFx48
 
             for (int i = 0; i < documentTypes.Length; i++)
             {
-                var (prefix, typeCode, description) = documentTypes[i];
+                (string prefix, string typeCode, string description) = documentTypes[i];
                 icv += 1;
 
-                var isSimplified = prefix.StartsWith("SIM");
+                bool isSimplified = prefix.StartsWith("SIM");
 
                 Console.WriteLine($"Processing {description}...");
 
-                var newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
+                XmlDocument newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
 
-                var requestResult = Helpers.GenerateRequestApi(newDoc, certInfo, pih, true);
+                RequestResult requestResult = Helpers.GenerateRequestApi(newDoc, certInfo, pih, true);
 
-                var serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
+                ServerResult serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
 
                 if (serverResult == null)
                 {
@@ -146,10 +146,10 @@ namespace NetFx48
 
                 // log Compliance Check
 
-                var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+                JsonSerializerSettings settings = new() { NullValueHandling = NullValueHandling.Ignore };
                 Console.WriteLine($"\n{description}\n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
 
-                var status = isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus;
+                string status = isSimplified ? serverResult.ReportingStatus : serverResult.ClearanceStatus;
 
                 if (status.Contains("REPORTED") || status.Contains("CLEARED"))
                 {
@@ -172,7 +172,7 @@ namespace NetFx48
         {
             Console.WriteLine("\nStep 4: Getting Production CSID");
 
-            var jsonContent = JsonConvert.SerializeObject(new { compliance_request_id = certInfo.CCSIDComplianceRequestId });
+            string jsonContent = JsonConvert.SerializeObject(new { compliance_request_id = certInfo.CCSIDComplianceRequestId });
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -181,8 +181,8 @@ namespace NetFx48
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
                 Convert.ToBase64String(Encoding.ASCII.GetBytes($"{certInfo.CCSIDBinaryToken}:{certInfo.CCSIDSecret}")));
 
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(certInfo.ProductionCSIDUrl, content);
+            StringContent content = new(jsonContent, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await _httpClient.PostAsync(certInfo.ProductionCSIDUrl, content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -192,8 +192,8 @@ namespace NetFx48
 
             response.EnsureSuccessStatusCode();
 
-            var resultContent = await response.Content.ReadAsStringAsync();
-            var zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
+            string resultContent = await response.Content.ReadAsStringAsync();
+            ZatcaResultDto zatcaResult = JsonConvert.DeserializeObject<ZatcaResultDto>(resultContent);
 
             certInfo.PCSIDBinaryToken = zatcaResult.BinarySecurityToken;
             certInfo.PCSIDSecret = zatcaResult.Secret;

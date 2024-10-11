@@ -23,7 +23,7 @@ namespace NetFx48
         public static CsrGenerationDto csrGenerationDto { get; } = LoadCsrGenerationDto();
         private static CsrGenerationDto LoadCsrGenerationDto()
         {
-            var properties = LoadProperties(CsrConfigPropertiesPath);
+            Dictionary<string, string> properties = LoadProperties(CsrConfigPropertiesPath);
             return new CsrGenerationDto(
                 properties["csr.common.name"],
                 properties["csr.serial.number"],
@@ -38,12 +38,12 @@ namespace NetFx48
         }
         private static Dictionary<string, string> LoadProperties(string filePath)
         {
-            var properties = new Dictionary<string, string>();
-            foreach (var line in System.IO.File.ReadAllLines(filePath))
+            Dictionary<string, string> properties = new();
+            foreach (string line in System.IO.File.ReadAllLines(filePath))
             {
                 if (!string.IsNullOrWhiteSpace(line) && line.Contains('='))
                 {
-                    var parts = line.Split('=');
+                    string[] parts = line.Split('=');
                     properties[parts[0].Trim()] = parts[1].Trim();
                 }
             }

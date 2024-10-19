@@ -18,7 +18,7 @@ class Program
         Console.WriteLine("\nStarting the console app...");
 
         // Extract schematrons from Zatca.eInvoiceSDK resources to file
-        Helpers.ExtractSchematrons();
+        // Helpers.ExtractSchematrons();
 
         try
         {

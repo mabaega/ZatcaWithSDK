@@ -68,6 +68,10 @@ namespace NetFx48
             string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(isForCompliance ? certInfo.CCSIDBinaryToken : certInfo.PCSIDBinaryToken));
             string privateKey = certInfo.PrivateKey;
 
+            // reformat XmlDocument to avoid InvoiceHash Error
+            // Zatca.eInvoice.SDK not work with linearized XML
+            document = PrettyXml(document);
+
             //Test use Certificate and privatekey from Zatca eInvoice SDK
             if (certInfo.EnvironmentType == EnvironmentType.NonProduction)
             {
@@ -96,6 +100,39 @@ namespace NetFx48
             }
 
             return requestResult;
+        }
+
+
+        internal static XmlDocument PrettyXml(XmlDocument inputXml)
+        {
+            XmlDocument formattedXml = new XmlDocument() { PreserveWhitespace = true };
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                using (StreamWriter streamWriter = new StreamWriter(memoryStream, new UTF8Encoding(false))) // false to exclude BOM
+                {
+                    XmlWriterSettings settings = new XmlWriterSettings()
+                    {
+                        Indent = true,
+                        IndentChars = "    ",
+                        OmitXmlDeclaration = false,
+                        Encoding = Encoding.UTF8,
+                    };
+
+                    using (XmlWriter xmlWriter = XmlWriter.Create(streamWriter, settings))
+                    {
+                        inputXml.Save(xmlWriter);
+                    }
+                }
+
+                // Get the UTF-8 encoded string from the MemoryStream
+                string utf8Xml = Encoding.UTF8.GetString(memoryStream.ToArray()).Trim();
+
+                // Load the UTF-8 XML string into the new XmlDocument
+                formattedXml.LoadXml(utf8Xml);
+            }
+
+            return formattedXml;
         }
 
         internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)

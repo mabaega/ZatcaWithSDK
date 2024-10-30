@@ -46,21 +46,6 @@ namespace ZatcaWithSDK
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        //public static void CopyDirectory(string sourceDir, string destinationDir)
-        //{
-        //    Directory.CreateDirectory(destinationDir);
-        //    foreach (string file in Directory.GetFiles(sourceDir))
-        //    {
-        //        string destFile = Path.Combine(destinationDir, Path.GetFileName(file));
-        //        File.Copy(file, destFile, true);
-        //    }
-        //    foreach (string subDir in Directory.GetDirectories(sourceDir))
-        //    {
-        //        string destSubDir = Path.Combine(destinationDir, Path.GetFileName(subDir));
-        //        CopyDirectory(subDir, destSubDir);
-        //    }
-        //}
-
         public static bool ExtractSchematrons()
         {
             Assembly assembly = Assembly.Load("Zatca.EInvoice.SDK");
@@ -101,6 +86,10 @@ namespace ZatcaWithSDK
             string x509CertificateContent = Encoding.UTF8.GetString(Convert.FromBase64String(isForCompliance ? certInfo.CCSIDBinaryToken : certInfo.PCSIDBinaryToken));
             string privateKey = certInfo.PrivateKey;
 
+            // reformat XmlDocument to avoid InvoiceHash Error
+            // Zatca.eInvoice.SDK not work with linearized XML
+            document = PrettyXml(document);
+
             //Test use Certificate and privatekey from Zatca eInvoice SDK
             if (certInfo.EnvironmentType == EnvironmentType.NonProduction)
             {
@@ -131,27 +120,37 @@ namespace ZatcaWithSDK
             return requestResult;
         }
 
+        internal static XmlDocument PrettyXml(XmlDocument inputXml)
+        {
+            XmlDocument formattedXml = new XmlDocument() { PreserveWhitespace = true };
 
-        //public XmlDocument LoadXmlDocument(XmlDocument document)
-        //{
-        //    XmlReaderSettings standardXsdReaderSettings = GetStandardXsdReaderSettings();
-        //    XmlDocument document1 = new XmlDocument { PreserveWhitespace = true };
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                using (StreamWriter streamWriter = new StreamWriter(memoryStream, new UTF8Encoding(false))) // false to exclude BOM
+                {
+                    XmlWriterSettings settings = new XmlWriterSettings()
+                    {
+                        Indent = true,
+                        IndentChars = "    ",
+                        OmitXmlDeclaration = false,
+                        Encoding = Encoding.UTF8,
+                    };
 
-        //    using (XmlReader reader = XmlReader.Create(new MemoryStream(Encoding.UTF8.GetBytes(document.OuterXml)), standardXsdReaderSettings))
-        //    {
-        //        document1.Load(reader);
-        //    }
-        //}
+                    using (XmlWriter xmlWriter = XmlWriter.Create(streamWriter, settings))
+                    {
+                        inputXml.Save(xmlWriter);
+                    }
+                }
 
-        //public static XmlReaderSettings GetStandardXsdReaderSettings()
-        //{
-        //    XmlReaderSettings settings1 = new XmlReaderSettings
-        //    {
-        //        DtdProcessing = DtdProcessing.Parse,
-        //        XmlResolver = new CustomUrlResolver()
-        //    };
-        //    return settings1;
-        //}
+                // Get the UTF-8 encoded string from the MemoryStream
+                string utf8Xml = Encoding.UTF8.GetString(memoryStream.ToArray()).Trim();
+
+                // Load the UTF-8 XML string into the new XmlDocument
+                formattedXml.LoadXml(utf8Xml);
+            }
+
+            return formattedXml;
+        }
 
         internal static bool IsValidInvoice(XmlDocument document, string x509CertificateContent, string pih)
         {

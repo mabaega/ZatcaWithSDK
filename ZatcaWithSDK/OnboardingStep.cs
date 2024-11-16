@@ -136,6 +136,8 @@ namespace ZatcaWithSDK
                     XmlDocument newDoc = Helpers.CreateModifiedInvoiceXml(baseDocument, $"{prefix}-0001", isSimplified ? "0200000" : "0100000", typeCode, icv, pih, description);
 
                     RequestResult requestResult = Helpers.GenerateRequestApi(newDoc, certInfo, pih, true);
+                    
+                    Console.WriteLine(requestResult.InvoiceRequest);
 
                     ServerResult serverResult = await Helpers.ComplianceCheck(certInfo, requestResult.InvoiceRequest);
 

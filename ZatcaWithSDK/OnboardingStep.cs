@@ -50,7 +50,7 @@ namespace ZatcaWithSDK
             Console.WriteLine("\nStep 1: Generating CSR and PrivateKey");
 
             CsrGenerator csrGenerator = new();
-            CsrResult csrResult = csrGenerator.GenerateCsr(AppConfig.CsrGenerationDto, AppConfig.EnvironmentType, false);
+            CsrResult csrResult = csrGenerator.GenerateCsr(ApplConfig.CsrGenerationDto, ApplConfig.EnvironmentType, false);
 
             if (!csrResult.IsValid)
             {
@@ -75,7 +75,7 @@ namespace ZatcaWithSDK
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en"));
-            _httpClient.DefaultRequestHeaders.Add("OTP", AppConfig.OTP);
+            _httpClient.DefaultRequestHeaders.Add("OTP", ApplConfig.OTP);
             _httpClient.DefaultRequestHeaders.Add("Accept-Version", "V2");
 
             StringContent content = new(jsonContent, Encoding.UTF8, "application/json");
@@ -108,7 +108,7 @@ namespace ZatcaWithSDK
                 Console.WriteLine("\nStep 3: Sending Sample Documents\n");
 
                 XmlDocument baseDocument = new() { PreserveWhitespace = true };
-                string templatePath = Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath);
+                string templatePath = Helpers.GetAbsolutePath(ApplConfig.TemplateInvoicePath);
 
                 baseDocument.Load(templatePath);
 

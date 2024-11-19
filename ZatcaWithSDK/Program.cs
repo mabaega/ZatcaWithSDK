@@ -31,7 +31,7 @@ class Program
                 OnboardingStep zatcaService = new();
                 certificateInfo = await OnboardingStep.DeviceOnboarding();
 
-                Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
+                Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(ApplConfig.CertificateInfoPath));
 
                 Console.WriteLine("\nOnboarding process completed successfully.\n");
             //}
@@ -39,12 +39,12 @@ class Program
             Console.WriteLine("\nStarting Test Approval...\n");
 
             // Load CertificateInfo from JSON file
-            certificateInfo = Helpers.DeserializeFromFile<CertificateInfo>(Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
+            certificateInfo = Helpers.DeserializeFromFile<CertificateInfo>(Helpers.GetAbsolutePath(ApplConfig.CertificateInfoPath));
 
             if (certificateInfo != null)
             {
                 XmlDocument document = new() { PreserveWhitespace = true };
-                document.Load(Helpers.GetAbsolutePath(AppConfig.TemplateInvoicePath));
+                document.Load(Helpers.GetAbsolutePath(ApplConfig.TemplateInvoicePath));
 
                 // Process Standard Invoice, Credit Note, and Debit Note
                 await ProcessStandardDocuments(document);
@@ -133,7 +133,7 @@ class Program
                 Console.WriteLine($"{description}\n\n{JsonConvert.SerializeObject(serverResult, Newtonsoft.Json.Formatting.Indented, settings)}\n\n");
 
                 //Update Crtificate Info
-                Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(AppConfig.CertificateInfoPath));
+                Helpers.SerializeToFile<CertificateInfo>(certificateInfo, Helpers.GetAbsolutePath(ApplConfig.CertificateInfoPath));
             }
             else
             {

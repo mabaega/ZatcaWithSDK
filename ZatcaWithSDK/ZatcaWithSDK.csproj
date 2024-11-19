@@ -37,14 +37,17 @@
     <Compile Remove="ikvm\**" />
     <Compile Remove="runtimes\**" />
     <Compile Remove="SDK3.3.5\**" />
+    <Compile Remove="SDK3.3.7\**" />
     <EmbeddedResource Remove="Data\**" />
     <EmbeddedResource Remove="ikvm\**" />
     <EmbeddedResource Remove="runtimes\**" />
     <EmbeddedResource Remove="SDK3.3.5\**" />
+    <EmbeddedResource Remove="SDK3.3.7\**" />
     <None Remove="Data\**" />
     <None Remove="ikvm\**" />
     <None Remove="runtimes\**" />
     <None Remove="SDK3.3.5\**" />
+    <None Remove="SDK3.3.7\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,13 +60,13 @@
 
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>SDK3.3.5\Newtonsoft.Json.dll</HintPath>
+      <HintPath>SDK3.3.7\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Zatca.EInvoice.SDK">
-      <HintPath>SDK3.3.5\Zatca.EInvoice.SDK.dll</HintPath>
+      <HintPath>SDK3.3.7\Zatca.EInvoice.SDK.dll</HintPath>
     </Reference>
     <Reference Include="Zatca.EInvoice.SDK.Contracts">
-      <HintPath>SDK3.3.5\Zatca.EInvoice.SDK.Contracts.dll</HintPath>
+      <HintPath>SDK3.3.7\Zatca.EInvoice.SDK.Contracts.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -7,7 +7,7 @@ namespace NetFx48
     public static class ApplConfig
     {
         // Select EnvironmentType
-        public static EnvironmentType EnvironmentType = EnvironmentType.NonProduction;
+        public static EnvironmentType EnvironmentType = EnvironmentType.Simulation;
 
         // Get OTP from fatoora Portal for Simulation Environment
         public static string OTP = "123456";

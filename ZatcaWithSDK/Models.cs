@@ -47,6 +47,10 @@ namespace ZatcaWithSDK
 
                 return $"https://gw-fatoora.zatca.gov.sa/e-invoicing/{environment}/{endpoint}";
             }
+            public CertificateInfo(EnvironmentType environmentType)
+            {
+                EnvironmentType = environmentType;
+            }
         }
 
         public class ServerResult

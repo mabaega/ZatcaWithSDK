@@ -86,10 +86,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)Data" "$(TargetDir)Data\" /E /I /Y</PostBuildEvent>
-    <PostBuildEvent>xcopy "$(ProjectDir)ikvm" "$(TargetDir)ikvm\" /E /I /Y</PostBuildEvent>
-    <PostBuildEvent>xcopy "$(ProjectDir)runtimes" "$(TargetDir)runtimes\" /E /I /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(ProjectDir)Data" "$(TargetDir)Data\" /E /I /Y &amp;&amp; xcopy "$(ProjectDir)ikvm" "$(TargetDir)ikvm\" /E /I /Y &amp;&amp; xcopy "$(ProjectDir)runtimes" "$(TargetDir)runtimes\" /E /I /Y</PostBuildEvent>
   </PropertyGroup>
+
   <Target Name="PostPublish" AfterTargets="AfterPublish">
     <Exec Command="xcopy &quot;$(ProjectDir)Data&quot; &quot;$(PublishDir)Data\&quot; /E /I /Y" />
   </Target>

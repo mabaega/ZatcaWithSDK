@@ -13,7 +13,7 @@ namespace ZatcaWithSDK
         private static readonly HttpClient _httpClient = new();
         public static async Task<CertificateInfo> DeviceOnboarding()
         {
-            CertificateInfo certInfo = new();
+            CertificateInfo certInfo = new CertificateInfo(ApplConfig.EnvironmentType);
 
             try
             {

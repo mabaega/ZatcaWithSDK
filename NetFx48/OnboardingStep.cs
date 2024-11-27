@@ -17,7 +17,7 @@ namespace NetFx48
 
         public static async Task<CertificateInfo> DeviceOnboarding()
         {
-            CertificateInfo certInfo = new();
+            CertificateInfo certInfo = new CertificateInfo(ApplConfig.EnvironmentType);
 
             try
             {
@@ -54,6 +54,7 @@ namespace NetFx48
         {
             Console.WriteLine("\nStep 1: Generating CSR and PrivateKey");
             CsrGenerator csrGenerator = new();
+
             CsrResult csrResult = csrGenerator.GenerateCsr(ApplConfig.csrGenerationDto, ApplConfig.EnvironmentType, false);
 
             if (!csrResult.IsValid)
